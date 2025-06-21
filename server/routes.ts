@@ -1,0 +1,302 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { insertUserSchema, insertPartnerSchema, insertInventorySchema, insertDealSchema, insertShipmentSchema, insertPaymentSchema, insertQualityCheckSchema } from "@shared/schema";
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user || user.password !== password) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      if (!user.isActive) {
+        return res.status(401).json({ message: "Account is inactive" });
+      }
+
+      // In production, you'd set up proper session management
+      const { password: _, ...userWithoutPassword } = user;
+      res.json({ user: userWithoutPassword });
+    } catch (error) {
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // User routes
+  app.get("/api/users", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+      res.json(usersWithoutPasswords);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/api/users", async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      const user = await storage.createUser(userData);
+      const { password: _, ...userWithoutPassword } = user;
+      res.status(201).json(userWithoutPassword);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid user data" });
+    }
+  });
+
+  app.put("/api/users/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userData = insertUserSchema.partial().parse(req.body);
+      const user = await storage.updateUser(id, userData);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const { password: _, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid user data" });
+    }
+  });
+
+  // Partner routes
+  app.get("/api/partners", async (req, res) => {
+    try {
+      const partners = await storage.getAllPartners();
+      res.json(partners);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch partners" });
+    }
+  });
+
+  app.post("/api/partners", async (req, res) => {
+    try {
+      const partnerData = insertPartnerSchema.parse(req.body);
+      const partner = await storage.createPartner(partnerData);
+      res.status(201).json(partner);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid partner data" });
+    }
+  });
+
+  app.put("/api/partners/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const partnerData = insertPartnerSchema.partial().parse(req.body);
+      const partner = await storage.updatePartner(id, partnerData);
+      
+      if (!partner) {
+        return res.status(404).json({ message: "Partner not found" });
+      }
+
+      res.json(partner);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid partner data" });
+    }
+  });
+
+  app.delete("/api/partners/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deletePartner(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Partner not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete partner" });
+    }
+  });
+
+  // Inventory routes
+  app.get("/api/inventory", async (req, res) => {
+    try {
+      const inventory = await storage.getAllInventory();
+      res.json(inventory);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inventory" });
+    }
+  });
+
+  app.post("/api/inventory", async (req, res) => {
+    try {
+      const inventoryData = insertInventorySchema.parse(req.body);
+      const item = await storage.createInventoryItem(inventoryData);
+      res.status(201).json(item);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid inventory data" });
+    }
+  });
+
+  app.put("/api/inventory/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const inventoryData = insertInventorySchema.partial().parse(req.body);
+      const item = await storage.updateInventoryItem(id, inventoryData);
+      
+      if (!item) {
+        return res.status(404).json({ message: "Inventory item not found" });
+      }
+
+      res.json(item);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid inventory data" });
+    }
+  });
+
+  app.delete("/api/inventory/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteInventoryItem(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Inventory item not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete inventory item" });
+    }
+  });
+
+  // Deal routes
+  app.get("/api/deals", async (req, res) => {
+    try {
+      const deals = await storage.getAllDeals();
+      res.json(deals);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch deals" });
+    }
+  });
+
+  app.post("/api/deals", async (req, res) => {
+    try {
+      const dealData = insertDealSchema.parse(req.body);
+      const deal = await storage.createDeal(dealData);
+      res.status(201).json(deal);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid deal data" });
+    }
+  });
+
+  app.put("/api/deals/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const dealData = insertDealSchema.partial().parse(req.body);
+      const deal = await storage.updateDeal(id, dealData);
+      
+      if (!deal) {
+        return res.status(404).json({ message: "Deal not found" });
+      }
+
+      res.json(deal);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid deal data" });
+    }
+  });
+
+  // Shipment routes
+  app.get("/api/shipments", async (req, res) => {
+    try {
+      const shipments = await storage.getAllShipments();
+      res.json(shipments);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch shipments" });
+    }
+  });
+
+  app.post("/api/shipments", async (req, res) => {
+    try {
+      const shipmentData = insertShipmentSchema.parse(req.body);
+      const shipment = await storage.createShipment(shipmentData);
+      res.status(201).json(shipment);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid shipment data" });
+    }
+  });
+
+  // Payment routes
+  app.get("/api/payments", async (req, res) => {
+    try {
+      const payments = await storage.getAllPayments();
+      res.json(payments);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  app.post("/api/payments", async (req, res) => {
+    try {
+      const paymentData = insertPaymentSchema.parse(req.body);
+      const payment = await storage.createPayment(paymentData);
+      res.status(201).json(payment);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid payment data" });
+    }
+  });
+
+  // Quality check routes
+  app.get("/api/quality-checks", async (req, res) => {
+    try {
+      const checks = await storage.getAllQualityChecks();
+      res.json(checks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quality checks" });
+    }
+  });
+
+  app.post("/api/quality-checks", async (req, res) => {
+    try {
+      const checkData = insertQualityCheckSchema.parse(req.body);
+      const check = await storage.createQualityCheck(checkData);
+      res.status(201).json(check);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid quality check data" });
+    }
+  });
+
+  // Statistics endpoint for dashboard
+  app.get("/api/stats", async (req, res) => {
+    try {
+      const inventory = await storage.getAllInventory();
+      const deals = await storage.getAllDeals();
+      const partners = await storage.getAllPartners();
+      const shipments = await storage.getAllShipments();
+
+      const stats = {
+        totalInventory: inventory.length,
+        activeDeals: deals.filter(deal => deal.status === 'confirmed' || deal.status === 'in_progress').length,
+        monthlyRevenue: deals
+          .filter(deal => deal.status === 'completed')
+          .reduce((total, deal) => total + parseFloat(deal.totalValue), 0),
+        pendingShipments: shipments.filter(shipment => shipment.status !== 'delivered').length,
+        totalSuppliers: partners.filter(partner => partner.type === 'supplier' || partner.type === 'both').length,
+        totalBuyers: partners.filter(partner => partner.type === 'buyer' || partner.type === 'both').length,
+        activePartnerships: partners.filter(partner => partner.status === 'active').length,
+        totalDeals: deals.length,
+        completedDeals: deals.filter(deal => deal.status === 'completed').length,
+        totalValue: deals.reduce((total, deal) => total + parseFloat(deal.totalValue), 0),
+      };
+
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch statistics" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
