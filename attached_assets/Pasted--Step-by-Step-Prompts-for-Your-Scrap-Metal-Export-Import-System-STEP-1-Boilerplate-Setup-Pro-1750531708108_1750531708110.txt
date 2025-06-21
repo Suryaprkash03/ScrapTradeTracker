@@ -1,0 +1,71 @@
+🧱 Step-by-Step Prompts for Your Scrap Metal Export & Import System
+🟢 STEP 1: Boilerplate Setup
+Prompt:
+
+Create a Next.js 14 project with TypeScript, Tailwind CSS, and Firebase integration. Set up Firebase Auth, Firestore, and Storage in a lib/firebase.ts file. Enable routing to login.tsx, dashboard.tsx, and add global styling.
+
+🟢 STEP 2: Authentication Module
+Prompt:
+
+Create a login and register page using Firebase Authentication (email/password). After login, redirect users to the /dashboard. Store user roles (Admin, Export Manager, etc.) in Firestore under /users.
+
+🟢 STEP 3: Role-Based Access Control
+Prompt:
+
+Implement role-based access using middleware in Next.js. Only allow Admins to access /admin, and Export Managers to access /deals. Show a restricted message or redirect if unauthorized.
+
+🟢 STEP 4: Supplier & Buyer Management
+Prompt:
+
+Build a CRUD interface to manage suppliers and buyers. Fields: companyName, contactPerson, country, type (supplier/buyer), documents (PDF upload), status. Store records in Firestore under /partners.
+
+🟢 STEP 5: Inventory Management
+Prompt:
+
+Build an Inventory module. Allow users to add scrap items with fields: metalType, grade, quantity, unit, ferrousOrNonFerrous, inspectionNotes, and attach quality reports. Store in /inventory Firestore collection. Add QR/Barcode generation for each batch.
+
+🟢 STEP 6: Scrap Lifecycle Tracker
+Prompt:
+
+Build a stepwise UI component for tracking the lifecycle of a scrap batch: Collection → Sorting → Cleaning → Melting → Solidifying → Disposal. Update Firestore fields like stage, methodUsed, certifications, distributionTarget per step.
+
+🟢 STEP 7: Deal Management
+Prompt:
+
+Create a form to generate new scrap deals. Inputs: buyerId, scrapId, quantity, rate, currency, status (draft/confirmed), paymentTerms. Allow PDF generation of proforma invoices using jsPDF. Store deals in /deals.
+
+🟢 STEP 8: Weighbridge & Quality Check
+Prompt:
+
+Build a weight and quality checker component. Allow manual input of grossWeight, netWeight, moisture, radiation, purityPercent. Store test results under /deals/{dealId}/quality.
+
+🟢 STEP 9: Export Documentation
+Prompt:
+
+Build a document generator for Commercial Invoice, Packing List, Bill of Lading, and Certificate of Origin. Use dummy templates and generate PDFs using pdf-lib. Save files to Firebase Storage under /deals/{dealId}/documents.
+
+🟢 STEP 10: Shipment Tracker
+Prompt:
+
+Create a shipment tracker UI. Fields: dealId, containerNo, vesselName, ETA, status (pickup, gate-in, sealed, dispatched). Update Firestore /shipments and link to deals.
+
+🟢 STEP 11: Finance Module
+Prompt:
+
+Create a finance module to record payments: dealId, paymentType (TT/LC), amount, currency, status, and upload proof file. Perform GST/VAT calculations and show totals.
+
+🟢 STEP 12: Reports & Analytics
+Prompt:
+
+Build a dashboard with charts using Recharts. Show monthly scrap volume, top buyers, profit per deal, and scrap type breakdowns. Fetch data from /inventory, /deals, and /shipments.
+
+🟢 STEP 13: Import Management
+Prompt:
+
+Create an Import Management module to handle overseas shipments. Fields: supplierId, inspectionAgency, ETA, customsCleared, warehouseIntakeStatus. Store under /imports.
+
+🟢 STEP 14: User Management (Admin Panel)
+Prompt:
+
+Build an admin panel to manage users. Allow role assignment (Admin, Yard Staff, Export Manager, etc.). Store user metadata in /users and restrict access based on role.
+
