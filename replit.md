@@ -128,6 +128,10 @@ Recent Changes:
 - Fixed admin documents module and populated with sample documents
 - Added Scrap Lifecycle Status display on admin dashboard
 - Created complete USER_MANUAL.md with detailed system documentation
+- Converted entire system from USD to Indian Rupees (INR) with proper formatting
+- Removed non-functional charts and replaced with clean data displays
+- Fixed Reports page with real data calculations for volume and profit analysis
+- Created LOCAL_SETUP.md for local installation instructions
 ```
 
 ## User Role Permissions
