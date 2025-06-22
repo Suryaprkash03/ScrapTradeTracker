@@ -50,7 +50,7 @@ export default function FinancePage() {
       dealId: 0,
       paymentType: "",
       amount: "",
-      currency: "USD",
+      currency: "INR",
       status: "pending",
       proofDocument: "",
       gstAmount: "",

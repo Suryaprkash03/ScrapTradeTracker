@@ -67,14 +67,14 @@ export default function Dashboard() {
     recycled: inventory?.filter((item: any) => item.lifecycleStage === 'recycled').length || 0,
   };
 
-  // Generate revenue trend data
+  // Generate revenue trend data (in INR)
   const revenueData = [
-    { month: 'Jan', revenue: 15000 },
-    { month: 'Feb', revenue: 18500 },
-    { month: 'Mar', revenue: 22000 },
-    { month: 'Apr', revenue: 19800 },
-    { month: 'May', revenue: 24600 },
-    { month: 'Jun', revenue: stats?.monthlyRevenue || 12550 },
+    { month: 'Jan', revenue: 1245000 },
+    { month: 'Feb', revenue: 1535500 },
+    { month: 'Mar', revenue: 1826000 },
+    { month: 'Apr', revenue: 1643400 },
+    { month: 'May', revenue: 2041800 },
+    { month: 'Jun', revenue: stats?.monthlyRevenue || 1041650 },
   ];
 
   const recentActivities = [
