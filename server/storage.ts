@@ -1,13 +1,13 @@
 import { 
-  users, partners, inventory, deals, shipments, payments, qualityChecks, documents, settings,
+  users, partners, inventory, deals, shipments, payments, qualityChecks, documents, settings, lifecycleUpdates,
   type User, type InsertUser, type Partner, type InsertPartner, 
   type Inventory, type InsertInventory, type Deal, type InsertDeal,
   type Shipment, type InsertShipment, type Payment, type InsertPayment,
   type QualityCheck, type InsertQualityCheck, type Document, type InsertDocument,
-  type Setting, type InsertSetting
+  type Setting, type InsertSetting, type LifecycleUpdate, type InsertLifecycleUpdate
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -514,19 +514,34 @@ export class DatabaseStorage implements IStorage {
 
   // Lifecycle Updates
   async createLifecycleUpdate(update: InsertLifecycleUpdate): Promise<LifecycleUpdate> {
-    const [lifecycleUpdate] = await db.insert(lifecycleUpdates).values(update).returning();
-    return lifecycleUpdate;
+    try {
+      const [lifecycleUpdate] = await db.insert(lifecycleUpdates).values(update).returning();
+      return lifecycleUpdate;
+    } catch (error) {
+      console.error("Error creating lifecycle update:", error);
+      throw error;
+    }
   }
 
   async getAllLifecycleUpdates(): Promise<LifecycleUpdate[]> {
-    return await db.select().from(lifecycleUpdates)
-      .orderBy(lifecycleUpdates.updatedAt);
+    try {
+      return await db.select().from(lifecycleUpdates)
+        .orderBy(desc(lifecycleUpdates.updatedAt));
+    } catch (error) {
+      console.error("Error getting all lifecycle updates:", error);
+      return [];
+    }
   }
 
   async getLifecycleUpdatesByInventory(inventoryId: number): Promise<LifecycleUpdate[]> {
-    return await db.select().from(lifecycleUpdates)
-      .where(eq(lifecycleUpdates.inventoryId, inventoryId))
-      .orderBy(lifecycleUpdates.updatedAt);
+    try {
+      return await db.select().from(lifecycleUpdates)
+        .where(eq(lifecycleUpdates.inventoryId, inventoryId))
+        .orderBy(desc(lifecycleUpdates.updatedAt));
+    } catch (error) {
+      console.error("Error getting lifecycle updates for inventory:", error);
+      return [];
+    }
   }
 }
 
