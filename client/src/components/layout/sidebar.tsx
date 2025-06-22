@@ -1,23 +1,22 @@
-import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { getInitials } from "@/lib/auth";
 import { hasPageAccess } from "@/lib/permissions";
-import { Button } from "@/components/ui/button";
-import { 
-  Factory, 
-  LayoutDashboard, 
-  Package, 
-  Handshake, 
-  FileText, 
-  Ship, 
-  DollarSign, 
-  BarChart3, 
-  Users, 
-  LogOut,
-  Settings,
+import {
+  BarChart3,
   CheckCircle,
-  Recycle
+  DollarSign,
+  Factory,
+  FileText,
+  Handshake,
+  LayoutDashboard,
+  LogOut,
+  Package,
+  Recycle,
+  Ship,
+  Users
 } from "lucide-react";
+import { useLocation } from "wouter";
 
 const allNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -31,7 +30,7 @@ const allNavigation = [
   { name: "Shipments", href: "/shipments", icon: Ship },
   { name: "Finance", href: "/finance", icon: DollarSign },
   { name: "Reports", href: "/reports", icon: BarChart3 },
-  { name: "Settings", href: "/settings", icon: Settings },
+  // { name: "Settings", href: "/settings", icon: Settings },
   { name: "User Management", href: "/users", icon: Users },
 ];
 

@@ -1,35 +1,37 @@
+import { insertDealSchema, insertInventorySchema, insertPartnerSchema, insertPaymentSchema, insertQualityCheckSchema, insertShipmentSchema, insertUserSchema } from "@shared/schema";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertPartnerSchema, insertInventorySchema, insertDealSchema, insertShipmentSchema, insertPaymentSchema, insertQualityCheckSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      
-      if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
-      }
+  try {
+    const { email, password } = req.body;
 
-      const user = await storage.getUserByEmail(email);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      if (!user.isActive) {
-        return res.status(401).json({ message: "Account is inactive" });
-      }
-
-      // In production, you'd set up proper session management
-      const { password: _, ...userWithoutPassword } = user;
-      res.json({ user: userWithoutPassword });
-    } catch (error) {
-      res.status(500).json({ message: "Login failed" });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
     }
-  });
+
+    const user = await storage.getUserByEmail(email);
+
+    if (!user || user.password !== password) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    if (!user.isActive) {
+      return res.status(401).json({ message: "Account is inactive" });
+    }
+
+    const { password: _, ...userWithoutPassword } = user;
+    res.json({ user: userWithoutPassword });
+
+  } catch (error: any) {
+    console.error("🔴 Login Error:", error.message, error.stack);  // ✅ add this
+    res.status(500).json({ message: "Login failed" });
+  }
+});
+
 
   // User routes
   app.get("/api/users", async (req, res) => {
