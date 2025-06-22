@@ -9,12 +9,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit, Eye, Trash2, Truck, ShoppingCart, Handshake } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AddPartnerModal from "@/components/modals/add-partner-modal";
+import ViewPartnerModal from "@/components/modals/view-partner-modal";
 import { apiRequest } from "@/lib/queryClient";
 import { getInitials } from "@/lib/auth";
 import type { Partner } from "@shared/schema";
 
 export default function PartnersPage() {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [filters, setFilters] = useState({
     type: "",
     search: "",
@@ -251,7 +254,14 @@ export default function PartnersPage() {
                           >
                             <Edit className="w-4 h-4 text-primary" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => {
+                              setSelectedPartner(partner);
+                              setShowViewModal(true);
+                            }}
+                          >
                             <Eye className="w-4 h-4 text-gray-600" />
                           </Button>
                           <Button 
@@ -280,6 +290,11 @@ export default function PartnersPage() {
       </Card>
 
       <AddPartnerModal open={showAddModal} onOpenChange={setShowAddModal} />
+      <ViewPartnerModal 
+        open={showViewModal} 
+        onOpenChange={setShowViewModal}
+        partner={selectedPartner}
+      />
     </div>
   );
 }

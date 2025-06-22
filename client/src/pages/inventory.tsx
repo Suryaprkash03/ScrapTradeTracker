@@ -9,12 +9,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit, Eye, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AddInventoryModal from "@/components/modals/add-inventory-modal";
+import ViewInventoryModal from "@/components/modals/view-inventory-modal";
 import { apiRequest } from "@/lib/queryClient";
 import type { Inventory } from "@shared/schema";
 
 export default function InventoryPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Inventory | null>(null);
   const [filters, setFilters] = useState({
     metalType: "",
@@ -219,7 +221,14 @@ export default function InventoryPage() {
                           >
                             <Edit className="w-4 h-4 text-primary" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setShowViewModal(true);
+                            }}
+                          >
                             <Eye className="w-4 h-4 text-gray-600" />
                           </Button>
                           <Button 
@@ -266,6 +275,11 @@ export default function InventoryPage() {
       </Card>
 
       <AddInventoryModal open={showAddModal} onOpenChange={setShowAddModal} />
+      <ViewInventoryModal 
+        open={showViewModal} 
+        onOpenChange={setShowViewModal}
+        inventory={selectedItem}
+      />
     </div>
   );
 }

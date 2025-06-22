@@ -9,12 +9,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit, Eye, FileText, DollarSign, Clock, CheckCircle, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import CreateDealModal from "@/components/modals/create-deal-modal";
+import ViewDealModal from "@/components/modals/view-deal-modal";
 import { apiRequest } from "@/lib/queryClient";
 import type { Deal, Partner, Inventory } from "@shared/schema";
 
 export default function DealsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [filters, setFilters] = useState({
     status: "",
@@ -246,7 +248,14 @@ export default function DealsPage() {
                           >
                             <Edit className="w-4 h-4 text-primary" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => {
+                              setSelectedDeal(deal);
+                              setShowViewModal(true);
+                            }}
+                          >
                             <Eye className="w-4 h-4 text-gray-600" />
                           </Button>
                           <Button 
@@ -274,6 +283,11 @@ export default function DealsPage() {
       </Card>
 
       <CreateDealModal open={showCreateModal} onOpenChange={setShowCreateModal} />
+      <ViewDealModal 
+        open={showViewModal} 
+        onOpenChange={setShowViewModal}
+        deal={selectedDeal}
+      />
     </div>
   );
 }

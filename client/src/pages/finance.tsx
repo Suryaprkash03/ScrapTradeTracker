@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
+import ViewPaymentModal from "@/components/modals/view-payment-modal";
 import { insertPaymentSchema, type Payment, type Deal } from "@shared/schema";
 
 const createPaymentSchema = insertPaymentSchema.extend({
@@ -27,6 +28,8 @@ type CreatePaymentForm = z.infer<typeof createPaymentSchema>;
 
 export default function FinancePage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [filters, setFilters] = useState({
     status: "",
     paymentType: "",
@@ -298,7 +301,14 @@ export default function FinancePage() {
                           <Button variant="ghost" size="icon">
                             <Edit className="w-4 h-4 text-primary" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => {
+                              setSelectedPayment(payment);
+                              setShowViewModal(true);
+                            }}
+                          >
                             <Eye className="w-4 h-4 text-gray-600" />
                           </Button>
                         </div>
@@ -437,6 +447,12 @@ export default function FinancePage() {
           </form>
         </DialogContent>
       </Dialog>
+      
+      <ViewPaymentModal 
+        open={showViewModal} 
+        onOpenChange={setShowViewModal}
+        payment={selectedPayment}
+      />
     </div>
   );
 }

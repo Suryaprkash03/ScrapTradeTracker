@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
+import ViewShipmentModal from "@/components/modals/view-shipment-modal";
 import { insertShipmentSchema, type Shipment, type Deal } from "@shared/schema";
 
 const createShipmentSchema = insertShipmentSchema.extend({
@@ -25,6 +26,7 @@ type CreateShipmentForm = z.infer<typeof createShipmentSchema>;
 export default function ShipmentsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [filters, setFilters] = useState({
     status: "",
@@ -309,7 +311,14 @@ export default function ShipmentsPage() {
                           >
                             <Edit className="w-4 h-4 text-primary" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => {
+                              setSelectedShipment(shipment);
+                              setShowViewModal(true);
+                            }}
+                          >
                             <Eye className="w-4 h-4 text-gray-600" />
                           </Button>
                           <Button 
@@ -417,6 +426,12 @@ export default function ShipmentsPage() {
           </form>
         </DialogContent>
       </Dialog>
+      
+      <ViewShipmentModal 
+        open={showViewModal} 
+        onOpenChange={setShowViewModal}
+        shipment={selectedShipment}
+      />
     </div>
   );
 }
