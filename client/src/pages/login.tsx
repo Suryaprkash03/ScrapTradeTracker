@@ -89,7 +89,7 @@ export default function Login() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@scrapflow.com"
+                placeholder="Enter your email"
                 {...form.register("email")}
                 className="h-12"
               />
@@ -103,7 +103,7 @@ export default function Login() {
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="Enter your password"
                 {...form.register("password")}
                 className="h-12"
               />
@@ -133,15 +133,6 @@ export default function Login() {
               {loginMutation.isPending ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 mb-2">Demo Users:</p>
-            <div className="space-y-1 text-xs text-gray-500">
-              <p><strong>Admin:</strong> admin@scrapflow.com (admin123)</p>
-              <p><strong>Export Manager:</strong> export@scrapflow.com (export123)</p>
-              <p><strong>Yard Staff:</strong> yard@scrapflow.com (yard123)</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
