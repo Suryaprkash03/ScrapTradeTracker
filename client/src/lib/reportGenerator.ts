@@ -1,12 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-
-// Extend jsPDF type to include autoTable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
+import autoTable from 'jspdf-autotable';
 
 interface ReportData {
   title: string;
@@ -88,7 +81,7 @@ export class ReportGenerator {
       `${(quantity as number).toFixed(2)} KG`
     ]);
     
-    this.doc.autoTable({
+    autoTable(this.doc, {
       startY: yPos + 5,
       head: [['Metal Type', 'Quantity']],
       body: metalTypeData,
@@ -111,7 +104,7 @@ export class ReportGenerator {
       item.location || 'N/A'
     ]);
     
-    this.doc.autoTable({
+    autoTable(this.doc, {
       startY: yPos + 5,
       head: [['Item ID', 'Metal Type', 'Grade', 'Quantity', 'Status', 'Location']],
       body: inventoryData,
@@ -142,7 +135,7 @@ export class ReportGenerator {
       ['Average Deal Value', `₹${data.data.avgDealValue.toLocaleString()}`]
     ];
     
-    this.doc.autoTable({
+    autoTable(this.doc, {
       startY: yPos,
       body: summaryData,
       theme: 'grid',
@@ -163,7 +156,7 @@ export class ReportGenerator {
       new Date(deal.createdAt).toLocaleDateString()
     ]);
     
-    this.doc.autoTable({
+    autoTable(this.doc, {
       startY: yPos + 5,
       head: [['Deal ID', 'Value', 'Status', 'Currency', 'Date']],
       body: dealsData,
@@ -192,7 +185,7 @@ export class ReportGenerator {
       ['Buyers', data.data.buyers.toString()]
     ];
     
-    this.doc.autoTable({
+    autoTable(this.doc, {
       startY: yPos,
       body: summaryData,
       theme: 'grid',
@@ -210,7 +203,7 @@ export class ReportGenerator {
       count.toString()
     ]);
     
-    this.doc.autoTable({
+    autoTable(this.doc, {
       startY: yPos + 5,
       head: [['Country', 'Partners']],
       body: countryData,
@@ -232,7 +225,7 @@ export class ReportGenerator {
       partner.status
     ]);
     
-    this.doc.autoTable({
+    autoTable(this.doc, {
       startY: yPos + 5,
       head: [['Company', 'Type', 'Country', 'Contact', 'Status']],
       body: partnerData,
@@ -261,7 +254,7 @@ export class ReportGenerator {
       ['On-time Deliveries', `${data.data.onTimeDeliveries}/${data.data.totalShipments}`]
     ];
     
-    this.doc.autoTable({
+    autoTable(this.doc, {
       startY: yPos,
       body: summaryData,
       theme: 'grid',

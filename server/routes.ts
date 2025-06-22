@@ -397,6 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(reportData);
     } catch (error) {
+      console.error('Report generation error:', error);
       res.status(500).json({ message: "Failed to generate report" });
     }
   });
