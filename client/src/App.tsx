@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/use-auth";
+import { hasPageAccess } from "@/lib/permissions";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import Inventory from "@/pages/inventory";
@@ -13,19 +14,28 @@ import Shipments from "@/pages/shipments";
 import Finance from "@/pages/finance";
 import Reports from "@/pages/reports";
 import Users from "@/pages/users";
+import ScrapLifecycle from "@/pages/scrap-lifecycle";
+import Documents from "@/pages/documents";
+import QualityCheck from "@/pages/quality-check";
+import Settings from "@/pages/settings";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import NotFound from "@/pages/not-found";
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+function ProtectedRoute({ children, requiredPage }: { children: React.ReactNode; requiredPage?: string }) {
+  const { isAuthenticated, user } = useAuth();
   
   if (!isAuthenticated) {
     return <Login />;
   }
 
+  // Check page access for role-based permissions
+  if (requiredPage && user && !hasPageAccess(user.role, requiredPage)) {
+    return <Dashboard />;
+  }
+
   return (
-    <div className="min-h-screen bg-neutral">
+    <div className="min-h-screen bg-background">
       <Sidebar />
       <div className="ml-64">
         <Header />
@@ -48,13 +58,18 @@ function Router() {
     <Switch>
       <Route path="/" component={() => <ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/dashboard" component={() => <ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/inventory" component={() => <ProtectedRoute><Inventory /></ProtectedRoute>} />
-      <Route path="/partners" component={() => <ProtectedRoute><Partners /></ProtectedRoute>} />
-      <Route path="/deals" component={() => <ProtectedRoute><Deals /></ProtectedRoute>} />
-      <Route path="/shipments" component={() => <ProtectedRoute><Shipments /></ProtectedRoute>} />
-      <Route path="/finance" component={() => <ProtectedRoute><Finance /></ProtectedRoute>} />
-      <Route path="/reports" component={() => <ProtectedRoute><Reports /></ProtectedRoute>} />
-      <Route path="/users" component={() => <ProtectedRoute><Users /></ProtectedRoute>} />
+      <Route path="/admin-dashboard" component={() => <ProtectedRoute requiredPage="/admin-dashboard"><Dashboard /></ProtectedRoute>} />
+      <Route path="/inventory" component={() => <ProtectedRoute requiredPage="/inventory"><Inventory /></ProtectedRoute>} />
+      <Route path="/scrap-lifecycle" component={() => <ProtectedRoute requiredPage="/scrap-lifecycle"><ScrapLifecycle /></ProtectedRoute>} />
+      <Route path="/quality-check" component={() => <ProtectedRoute requiredPage="/quality-check"><QualityCheck /></ProtectedRoute>} />
+      <Route path="/partners" component={() => <ProtectedRoute requiredPage="/partners"><Partners /></ProtectedRoute>} />
+      <Route path="/deals" component={() => <ProtectedRoute requiredPage="/deals"><Deals /></ProtectedRoute>} />
+      <Route path="/documents" component={() => <ProtectedRoute requiredPage="/documents"><Documents /></ProtectedRoute>} />
+      <Route path="/shipments" component={() => <ProtectedRoute requiredPage="/shipments"><Shipments /></ProtectedRoute>} />
+      <Route path="/finance" component={() => <ProtectedRoute requiredPage="/finance"><Finance /></ProtectedRoute>} />
+      <Route path="/reports" component={() => <ProtectedRoute requiredPage="/reports"><Reports /></ProtectedRoute>} />
+      <Route path="/settings" component={() => <ProtectedRoute requiredPage="/settings"><Settings /></ProtectedRoute>} />
+      <Route path="/users" component={() => <ProtectedRoute requiredPage="/users"><Users /></ProtectedRoute>} />
       <Route component={NotFound} />
     </Switch>
   );

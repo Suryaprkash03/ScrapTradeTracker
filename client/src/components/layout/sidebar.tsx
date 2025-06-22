@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { getInitials } from "@/lib/auth";
+import { hasPageAccess } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { 
   Factory, 
@@ -12,23 +13,36 @@ import {
   DollarSign, 
   BarChart3, 
   Users, 
-  LogOut 
+  LogOut,
+  Settings,
+  CheckCircle,
+  Recycle
 } from "lucide-react";
 
-const navigation = [
+const allNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Admin Dashboard", href: "/admin-dashboard", icon: LayoutDashboard },
   { name: "Inventory", href: "/inventory", icon: Package },
+  { name: "Scrap Lifecycle", href: "/scrap-lifecycle", icon: Recycle },
+  { name: "Quality Check", href: "/quality-check", icon: CheckCircle },
   { name: "Partners", href: "/partners", icon: Handshake },
   { name: "Deals", href: "/deals", icon: FileText },
+  { name: "Documents", href: "/documents", icon: FileText },
   { name: "Shipments", href: "/shipments", icon: Ship },
   { name: "Finance", href: "/finance", icon: DollarSign },
   { name: "Reports", href: "/reports", icon: BarChart3 },
+  { name: "Settings", href: "/settings", icon: Settings },
   { name: "User Management", href: "/users", icon: Users },
 ];
 
 export default function Sidebar() {
   const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
+
+  // Filter navigation based on user role
+  const navigation = allNavigation.filter(item => 
+    !user || hasPageAccess(user.role, item.href)
+  );
 
   const handleNavigation = (href: string) => {
     setLocation(href);

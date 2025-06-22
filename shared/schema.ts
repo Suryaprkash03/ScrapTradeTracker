@@ -125,9 +125,47 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
   createdAt: true,
 });
 
+// Documents table for commercial documents
+export const documents = pgTable("documents", {
+  id: serial("id").primaryKey(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  dealId: integer("deal_id").notNull(),
+  documentType: text("document_type").notNull(), // invoice, packing_list, bol, coo, lc, inspection_certificate
+  fileName: text("file_name").notNull(),
+  filePath: text("file_path").notNull(),
+  fileSize: integer("file_size"),
+  uploadedBy: integer("uploaded_by").notNull(),
+  status: text("status").notNull().default("pending"), // pending, approved, rejected
+  approvedBy: integer("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  rejectedBy: integer("rejected_by"),
+  rejectedAt: timestamp("rejected_at"),
+  rejectionReason: text("rejection_reason"),
+});
+
+// Settings table for system configuration
+export const settings = pgTable("settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: jsonb("value").notNull(),
+  description: text("description"),
+  updatedBy: integer("updated_by").notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const insertQualityCheckSchema = createInsertSchema(qualityChecks).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertDocumentSchema = createInsertSchema(documents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSettingSchema = createInsertSchema(settings).omit({
+  id: true,
+  updatedAt: true,
 });
 
 // Types
@@ -145,3 +183,9 @@ export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type QualityCheck = typeof qualityChecks.$inferSelect;
 export type InsertQualityCheck = z.infer<typeof insertQualityCheckSchema>;
+
+export type Document = typeof documents.$inferSelect;
+export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+
+export type Setting = typeof settings.$inferSelect;
+export type InsertSetting = z.infer<typeof insertSettingSchema>;

@@ -297,6 +297,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Documents routes
+  app.get('/api/documents', async (req, res) => {
+    try {
+      const documents = await storage.getAllDocuments();
+      res.json(documents);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch documents' });
+    }
+  });
+
+  app.post('/api/documents', async (req, res) => {
+    try {
+      const document = await storage.createDocument(req.body);
+      res.status(201).json(document);
+    } catch (error) {
+      res.status(400).json({ error: 'Failed to create document' });
+    }
+  });
+
+  app.patch('/api/documents/:id/approve', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { approvedBy } = req.body;
+      const document = await storage.approveDocument(id, approvedBy);
+      if (!document) {
+        return res.status(404).json({ error: 'Document not found' });
+      }
+      res.json(document);
+    } catch (error) {
+      res.status(400).json({ error: 'Failed to approve document' });
+    }
+  });
+
+  app.patch('/api/documents/:id/reject', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { rejectedBy, rejectionReason } = req.body;
+      const document = await storage.rejectDocument(id, rejectedBy, rejectionReason);
+      if (!document) {
+        return res.status(404).json({ error: 'Document not found' });
+      }
+      res.json(document);
+    } catch (error) {
+      res.status(400).json({ error: 'Failed to reject document' });
+    }
+  });
+
+  // Settings routes
+  app.get('/api/settings', async (req, res) => {
+    try {
+      const settings = await storage.getAllSettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch settings' });
+    }
+  });
+
+  app.get('/api/settings/:key', async (req, res) => {
+    try {
+      const setting = await storage.getSetting(req.params.key);
+      if (!setting) {
+        return res.status(404).json({ error: 'Setting not found' });
+      }
+      res.json(setting);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch setting' });
+    }
+  });
+
+  app.put('/api/settings/:key', async (req, res) => {
+    try {
+      const { value, description, updatedBy } = req.body;
+      const setting = await storage.updateSetting(req.params.key, value, description, updatedBy);
+      res.json(setting);
+    } catch (error) {
+      res.status(400).json({ error: 'Failed to update setting' });
+    }
+  });
+
+  app.delete('/api/settings/:key', async (req, res) => {
+    try {
+      const deleted = await storage.deleteSetting(req.params.key);
+      if (!deleted) {
+        return res.status(404).json({ error: 'Setting not found' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete setting' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

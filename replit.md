@@ -110,11 +110,55 @@ ScrapFlow is a comprehensive metal trading management system built as a full-sta
 - Environment variable configuration for database URLs
 - Serverless PostgreSQL for scalable data storage
 
+## Recent Changes
+
+```
+Recent Changes:
+- June 21, 2025: Enhanced application with comprehensive role-based access control
+- Added Documents module for commercial document management (Invoice, BoL, COO, etc.)
+- Implemented Scrap Lifecycle Management for yard staff operations
+- Added Quality Check module with weighbridge and test results
+- Created Settings module for system configuration
+- Enhanced permissions system with page-level and action-level access control
+- Added support for barcode/QR code generation for inventory items
+- Implemented deal approval/rejection workflow
+- Added document approval/rejection workflow
+- Enhanced inventory with lifecycle stages (collection→sorting→cleaning→melting→distribution)
+```
+
+## User Role Permissions
+
+### Admin Access
+- Full system access with all CRUD operations
+- User management and role assignment
+- System settings configuration
+- Deal approval/rejection authority
+- All modules: Dashboard, Inventory, Partners, Deals, Shipments, Documents, Finance, Reports, Settings, Users
+
+### Export Manager Access
+- Create and manage export deals
+- Upload and manage commercial documents
+- Track shipments and update status
+- Record weighbridge and quality test results
+- Manage payment records (Advance, TT, LC)
+- Access to: Dashboard, Deals, Documents, Shipments, Finance, Reports, Partners
+- Restrictions: Cannot manage users, cannot delete inventory, no import data access
+
+### Yard Staff Access
+- Manage scrap inventory and lifecycle stages
+- Input collection→sorting→cleaning→melting→distribution stages
+- Upload inspection and quality reports
+- Assign barcodes/QR codes to scrap batches
+- Mark items as recycled or disposed
+- View-only access to shipments
+- Access to: Inventory, Scrap-Lifecycle, Quality-Check, Shipments (read-only)
+- Restrictions: No deals, payments, documents, suppliers/buyers, or reports access
+
 ## Changelog
 
 ```
 Changelog:
-- June 21, 2025. Initial setup
+- June 21, 2025. Initial setup and comprehensive role-based enhancement
 ```
 
 ## User Preferences
