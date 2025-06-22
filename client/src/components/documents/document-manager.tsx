@@ -26,6 +26,7 @@ interface DocumentUploadData {
 export default function DocumentManager() {
   const [selectedDeal, setSelectedDeal] = useState<number | null>(null);
   const [uploadData, setUploadData] = useState<Partial<DocumentUploadData>>({});
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
   const [viewDocumentDialogOpen, setViewDocumentDialogOpen] = useState(false);
@@ -44,8 +45,14 @@ export default function DocumentManager() {
   });
 
   const uploadDocumentMutation = useMutation({
-    mutationFn: (data: DocumentUploadData) =>
-      apiRequest("POST", "/api/documents", { ...data, uploadedBy: user?.id }),
+    mutationFn: async (formData: FormData) => {
+      const response = await fetch("/api/documents", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) throw new Error("Failed to upload document");
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
       toast({
@@ -54,11 +61,12 @@ export default function DocumentManager() {
       });
       setUploadDialogOpen(false);
       setUploadData({});
+      setSelectedFile(null);
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Failed to upload document",
+        description: error.message || "Failed to upload document",
         variant: "destructive",
       });
     }
@@ -127,29 +135,32 @@ export default function DocumentManager() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // In a real application, you would upload the file to a storage service
-      // For this demo, we'll simulate the file path
-      const filePath = `/uploads/documents/${Date.now()}_${file.name}`;
+      setSelectedFile(file);
       setUploadData(prev => ({
         ...prev,
         fileName: file.name,
-        filePath,
         fileSize: file.size
       }));
     }
   };
 
   const handleUpload = () => {
-    if (!uploadData.dealId || !uploadData.documentType || !uploadData.fileName) {
+    if (!uploadData.dealId || !uploadData.documentType || !selectedFile) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please select a deal, document type, and file",
         variant: "destructive",
       });
       return;
     }
 
-    uploadDocumentMutation.mutate(uploadData as DocumentUploadData);
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('dealId', uploadData.dealId.toString());
+    formData.append('documentType', uploadData.documentType);
+    formData.append('uploadedBy', user?.id?.toString() || '');
+
+    uploadDocumentMutation.mutate(formData);
   };
 
   const handleApprove = () => {
@@ -181,23 +192,58 @@ export default function DocumentManager() {
     const filePath = doc.file_path || doc.filePath;
     const extension = getFileExtension(fileName);
     
-    // For demo purposes, show document information instead of trying to load non-existent files
-    return (
-      <div className="text-center p-8 bg-gray-50">
-        <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-        <div className="space-y-2">
-          <p className="font-medium text-gray-800">Document Preview</p>
-          <p className="text-sm text-gray-600">File: {fileName}</p>
-          <p className="text-xs text-gray-500">Type: {extension.toUpperCase()}</p>
-          <p className="text-xs text-gray-500">Path: {filePath}</p>
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
-            <p className="text-sm text-blue-800">
-              This is a sample document entry. In a production environment, this would display the actual uploaded document content.
-            </p>
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+      return (
+        <div className="flex justify-center p-4">
+          <img 
+            src={filePath} 
+            alt={fileName}
+            className="max-w-full max-h-96 object-contain border rounded"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              target.nextElementSibling!.classList.remove('hidden');
+            }}
+          />
+          <div className="hidden text-center p-8 text-gray-500">
+            <FileText className="w-16 h-16 mx-auto mb-4" />
+            <p>Image preview not available</p>
+            <p className="text-sm">File: {fileName}</p>
           </div>
         </div>
-      </div>
-    );
+      );
+    } else if (extension === 'pdf') {
+      return (
+        <div className="flex justify-center p-4">
+          <iframe
+            src={filePath}
+            className="w-full h-96 border rounded"
+            title={fileName}
+            onError={(e) => {
+              console.log('PDF preview error:', e);
+            }}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="text-center p-8 text-gray-500">
+          <FileText className="w-16 h-16 mx-auto mb-4" />
+          <p>Preview not available for this file type</p>
+          <p className="text-sm">File: {fileName}</p>
+          <p className="text-xs">Type: {extension.toUpperCase()}</p>
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              onClick={() => window.open(filePath, '_blank')}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download File
+            </Button>
+          </div>
+        </div>
+      );
+    }
   };
 
   const canUploadDocuments = hasPermission(user?.role || '', 'upload_documents');

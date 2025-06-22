@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express, { NextFunction, type Request, Response } from "express";
+import path from "path";
 import { registerRoutes } from "./routes";
 import { log, serveStatic, setupVite } from "./vite";
 dotenv.config();
@@ -8,6 +9,9 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.use((req, res, next) => {
   const start = Date.now();

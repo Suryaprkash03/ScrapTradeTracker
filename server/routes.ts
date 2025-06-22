@@ -1,7 +1,38 @@
 import { insertDealSchema, insertInventorySchema, insertPartnerSchema, insertPaymentSchema, insertQualityCheckSchema, insertShipmentSchema, insertUserSchema } from "@shared/schema";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
+import path from "path";
 import { storage } from "./storage";
+
+// Configure multer for file uploads
+const uploadStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/documents/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: uploadStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /pdf|doc|docx|jpg|jpeg|png|gif/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only documents and images are allowed'));
+    }
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -412,12 +443,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/documents', async (req, res) => {
+  app.post('/api/documents', upload.single('file'), async (req, res) => {
     try {
-      const document = await storage.createDocument(req.body);
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      const { dealId, documentType, uploadedBy } = req.body;
+      
+      const documentData = {
+        dealId: parseInt(dealId),
+        documentType,
+        fileName: req.file.originalname,
+        filePath: `/uploads/documents/${req.file.filename}`,
+        fileSize: req.file.size,
+        uploadedBy: parseInt(uploadedBy)
+      };
+
+      const document = await storage.createDocument(documentData);
       res.status(201).json(document);
     } catch (error) {
-      res.status(400).json({ error: 'Failed to create document' });
+      console.error('File upload error:', error);
+      res.status(400).json({ error: 'Failed to upload document' });
     }
   });
 
