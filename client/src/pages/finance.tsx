@@ -129,8 +129,8 @@ export default function FinancePage() {
   };
 
   const filteredPayments = payments?.filter(payment => {
-    const matchesStatus = !filters.status || payment.status === filters.status;
-    const matchesType = !filters.paymentType || payment.paymentType === filters.paymentType;
+    const matchesStatus = !filters.status || filters.status === "all" || payment.status === filters.status;
+    const matchesType = !filters.paymentType || filters.paymentType === "all" || payment.paymentType === filters.paymentType;
     const matchesSearch = !filters.search || 
       getDealInfo(payment.dealId).toLowerCase().includes(filters.search.toLowerCase()) ||
       payment.paymentType.toLowerCase().includes(filters.search.toLowerCase());
@@ -224,7 +224,7 @@ export default function FinancePage() {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="failed">Failed</SelectItem>
@@ -235,7 +235,7 @@ export default function FinancePage() {
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="TT">TT</SelectItem>
                   <SelectItem value="LC">LC</SelectItem>
                   <SelectItem value="cash">Cash</SelectItem>

@@ -23,6 +23,35 @@ export default function PartnersPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const deletePartnerMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/partners/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/partners"] });
+      toast({
+        title: "Success",
+        description: "Partner deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete partner",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEdit = (partner: Partner) => {
+    setSelectedPartner(partner);
+    setShowEditModal(true);
+  };
+
+  const handleDelete = (partner: Partner) => {
+    if (confirm(`Are you sure you want to delete ${partner.companyName}?`)) {
+      deletePartnerMutation.mutate(partner.id);
+    }
+  };
+
   const { data: partners, isLoading } = useQuery<Partner[]>({
     queryKey: ["/api/partners"],
   });
@@ -45,11 +74,7 @@ export default function PartnersPage() {
     },
   });
 
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this partner?")) {
-      deleteMutation.mutate(id);
-    }
-  };
+
 
   const getTypeBadge = (type: string) => {
     const typeConfig = {
@@ -218,7 +243,11 @@ export default function PartnersPage() {
                       <td className="px-6 py-4">{getStatusBadge(partner.status)}</td>
                       <td className="px-6 py-4 text-sm">
                         <div className="flex space-x-2">
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleEdit(partner)}
+                          >
                             <Edit className="w-4 h-4 text-primary" />
                           </Button>
                           <Button variant="ghost" size="icon">
@@ -227,8 +256,8 @@ export default function PartnersPage() {
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            onClick={() => handleDelete(partner.id)}
-                            disabled={deleteMutation.isPending}
+                            onClick={() => handleDelete(partner)}
+                            disabled={deletePartnerMutation.isPending}
                           >
                             <Trash2 className="w-4 h-4 text-red-600" />
                           </Button>
@@ -250,6 +279,11 @@ export default function PartnersPage() {
       </Card>
 
       <AddPartnerModal open={showAddModal} onOpenChange={setShowAddModal} />
+      <EditPartnerModal 
+        open={showEditModal} 
+        onOpenChange={setShowEditModal}
+        partner={selectedPartner}
+      />
     </div>
   );
 }

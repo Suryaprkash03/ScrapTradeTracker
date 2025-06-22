@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Edit, Eye, Ship, Package, Clock, MapPin } from "lucide-react";
+import { Plus, Edit, Eye, Ship, Package, Clock, MapPin, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import EditShipmentModal from "@/components/modals/edit-shipment-modal";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,6 +25,8 @@ type CreateShipmentForm = z.infer<typeof createShipmentSchema>;
 
 export default function ShipmentsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [filters, setFilters] = useState({
     status: "",
     search: "",
@@ -72,6 +75,35 @@ export default function ShipmentsPage() {
     },
   });
 
+  const deleteShipmentMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/shipments/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shipments"] });
+      toast({
+        title: "Success",
+        description: "Shipment deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete shipment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEdit = (shipment: Shipment) => {
+    setSelectedShipment(shipment);
+    setShowEditModal(true);
+  };
+
+  const handleDelete = (shipment: Shipment) => {
+    if (confirm(`Are you sure you want to delete this shipment?`)) {
+      deleteShipmentMutation.mutate(shipment.id);
+    }
+  };
+
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<Shipment> }) =>
       apiRequest("PUT", `/api/shipments/${id}`, data),
@@ -115,7 +147,7 @@ export default function ShipmentsPage() {
   };
 
   const filteredShipments = shipments?.filter(shipment => {
-    const matchesStatus = !filters.status || shipment.status === filters.status;
+    const matchesStatus = !filters.status || filters.status === "all" || shipment.status === filters.status;
     const matchesSearch = !filters.search || 
       (shipment.containerNo?.toLowerCase().includes(filters.search.toLowerCase())) ||
       (shipment.vesselName?.toLowerCase().includes(filters.search.toLowerCase())) ||
@@ -210,7 +242,7 @@ export default function ShipmentsPage() {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="preparation">Preparation</SelectItem>
                   <SelectItem value="pickup">Pickup</SelectItem>
                   <SelectItem value="gate_in">Gate In</SelectItem>
@@ -271,11 +303,23 @@ export default function ShipmentsPage() {
                       <td className="px-6 py-4">{getStatusBadge(shipment.status)}</td>
                       <td className="px-6 py-4 text-sm">
                         <div className="flex space-x-2">
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleEdit(shipment)}
+                          >
                             <Edit className="w-4 h-4 text-primary" />
                           </Button>
                           <Button variant="ghost" size="icon">
                             <Eye className="w-4 h-4 text-gray-600" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleDelete(shipment)}
+                            disabled={deleteShipmentMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600" />
                           </Button>
                         </div>
                       </td>
@@ -374,6 +418,11 @@ export default function ShipmentsPage() {
           </form>
         </DialogContent>
       </Dialog>
+      <EditShipmentModal 
+        open={showEditModal} 
+        onOpenChange={setShowEditModal}
+        shipment={selectedShipment}
+      />
     </div>
   );
 }

@@ -9,11 +9,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit, Eye, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AddInventoryModal from "@/components/modals/add-inventory-modal";
+import EditInventoryModal from "@/components/modals/edit-inventory-modal";
 import { apiRequest } from "@/lib/queryClient";
 import type { Inventory } from "@shared/schema";
 
 export default function InventoryPage() {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Inventory | null>(null);
   const [filters, setFilters] = useState({
     metalType: "",
     grade: "",
@@ -23,6 +26,35 @@ export default function InventoryPage() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const deleteItemMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/inventory/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
+      toast({
+        title: "Success",
+        description: "Item deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete item",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEdit = (item: Inventory) => {
+    setSelectedItem(item);
+    setShowEditModal(true);
+  };
+
+  const handleDelete = (item: Inventory) => {
+    if (confirm(`Are you sure you want to delete ${item.itemId}?`)) {
+      deleteItemMutation.mutate(item.id);
+    }
+  };
 
   const { data: inventory, isLoading } = useQuery<Inventory[]>({
     queryKey: ["/api/inventory"],
@@ -46,11 +78,7 @@ export default function InventoryPage() {
     },
   });
 
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this inventory item?")) {
-      deleteMutation.mutate(id);
-    }
-  };
+
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -185,7 +213,11 @@ export default function InventoryPage() {
                       <td className="px-6 py-4">{getStatusBadge(item.status)}</td>
                       <td className="px-6 py-4 text-sm">
                         <div className="flex space-x-2">
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleEdit(item)}
+                          >
                             <Edit className="w-4 h-4 text-primary" />
                           </Button>
                           <Button variant="ghost" size="icon">
@@ -194,8 +226,8 @@ export default function InventoryPage() {
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            onClick={() => handleDelete(item.id)}
-                            disabled={deleteMutation.isPending}
+                            onClick={() => handleDelete(item)}
+                            disabled={deleteItemMutation.isPending}
                           >
                             <Trash2 className="w-4 h-4 text-red-600" />
                           </Button>
@@ -235,6 +267,11 @@ export default function InventoryPage() {
       </Card>
 
       <AddInventoryModal open={showAddModal} onOpenChange={setShowAddModal} />
+      <EditInventoryModal 
+        open={showEditModal} 
+        onOpenChange={setShowEditModal}
+        inventory={selectedItem}
+      />
     </div>
   );
 }

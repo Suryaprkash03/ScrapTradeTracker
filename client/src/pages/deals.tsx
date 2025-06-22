@@ -6,14 +6,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Edit, Eye, FileText, DollarSign, Clock, CheckCircle } from "lucide-react";
+import { Plus, Edit, Eye, FileText, DollarSign, Clock, CheckCircle, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import CreateDealModal from "@/components/modals/create-deal-modal";
+import EditDealModal from "@/components/modals/edit-deal-modal";
 import { apiRequest } from "@/lib/queryClient";
 import type { Deal, Partner, Inventory } from "@shared/schema";
 
 export default function DealsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [filters, setFilters] = useState({
     status: "",
     search: "",
@@ -34,24 +37,34 @@ export default function DealsPage() {
     queryKey: ["/api/inventory"],
   });
 
-  const updateDealMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Deal> }) =>
-      apiRequest("PUT", `/api/deals/${id}`, data),
+  const deleteDealMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/deals/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/deals"] });
       toast({
         title: "Success",
-        description: "Deal updated successfully",
+        description: "Deal deleted successfully",
       });
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to update deal",
+        description: "Failed to delete deal",
         variant: "destructive",
       });
     },
   });
+
+  const handleEdit = (deal: Deal) => {
+    setSelectedDeal(deal);
+    setShowEditModal(true);
+  };
+
+  const handleDelete = (deal: Deal) => {
+    if (confirm(`Are you sure you want to delete deal ${deal.dealId}?`)) {
+      deleteDealMutation.mutate(deal.id);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -77,7 +90,7 @@ export default function DealsPage() {
   };
 
   const filteredDeals = deals?.filter(deal => {
-    const matchesStatus = !filters.status || deal.status === filters.status;
+    const matchesStatus = !filters.status || filters.status === "all" || deal.status === filters.status;
     const matchesSearch = !filters.search || 
       deal.dealId.toLowerCase().includes(filters.search.toLowerCase()) ||
       getBuyerName(deal.buyerId).toLowerCase().includes(filters.search.toLowerCase());
@@ -171,7 +184,7 @@ export default function DealsPage() {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="confirmed">Confirmed</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
@@ -227,14 +240,22 @@ export default function DealsPage() {
                       <td className="px-6 py-4">{getStatusBadge(deal.status)}</td>
                       <td className="px-6 py-4 text-sm">
                         <div className="flex space-x-2">
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleEdit(deal)}
+                          >
                             <Edit className="w-4 h-4 text-primary" />
                           </Button>
                           <Button variant="ghost" size="icon">
                             <Eye className="w-4 h-4 text-gray-600" />
                           </Button>
-                          <Button variant="ghost" size="icon">
-                            <FileText className="w-4 h-4 text-purple-600" />
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleDelete(deal)}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600" />
                           </Button>
                         </div>
                       </td>
@@ -254,6 +275,11 @@ export default function DealsPage() {
       </Card>
 
       <CreateDealModal open={showCreateModal} onOpenChange={setShowCreateModal} />
+      <EditDealModal 
+        open={showEditModal} 
+        onOpenChange={setShowEditModal}
+        deal={selectedDeal}
+      />
     </div>
   );
 }
