@@ -89,7 +89,7 @@ export default function DealsPage() {
   };
 
   const filteredDeals = deals?.filter(deal => {
-    const matchesStatus = !filters.status || deal.status === filters.status;
+    const matchesStatus = !filters.status || filters.status === "all" || deal.status === filters.status;
     const matchesSearch = !filters.search || 
       deal.dealId.toLowerCase().includes(filters.search.toLowerCase()) ||
       getBuyerName(deal.buyerId).toLowerCase().includes(filters.search.toLowerCase());
@@ -183,7 +183,7 @@ export default function DealsPage() {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="confirmed">Confirmed</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>

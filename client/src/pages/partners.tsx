@@ -182,7 +182,7 @@ export default function PartnersPage() {
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="supplier">Suppliers</SelectItem>
                   <SelectItem value="buyer">Buyers</SelectItem>
                   <SelectItem value="both">Both</SelectItem>

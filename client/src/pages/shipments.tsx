@@ -146,7 +146,7 @@ export default function ShipmentsPage() {
   };
 
   const filteredShipments = shipments?.filter(shipment => {
-    const matchesStatus = !filters.status || shipment.status === filters.status;
+    const matchesStatus = !filters.status || filters.status === "all" || shipment.status === filters.status;
     const matchesSearch = !filters.search || 
       (shipment.containerNo?.toLowerCase().includes(filters.search.toLowerCase())) ||
       (shipment.vesselName?.toLowerCase().includes(filters.search.toLowerCase())) ||
@@ -241,7 +241,7 @@ export default function ShipmentsPage() {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="preparation">Preparation</SelectItem>
                   <SelectItem value="pickup">Pickup</SelectItem>
                   <SelectItem value="gate_in">Gate In</SelectItem>
