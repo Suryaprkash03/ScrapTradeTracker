@@ -26,6 +26,15 @@ interface DashboardStats {
   pendingShipments: number;
 }
 
+interface LifecycleStats {
+  collection: number;
+  sorting: number;
+  cleaning: number;
+  melting: number;
+  distribution: number;
+  recycled: number;
+}
+
 export default function Dashboard() {
   const [showAddInventory, setShowAddInventory] = useState(false);
   const [showAddPartner, setShowAddPartner] = useState(false);
