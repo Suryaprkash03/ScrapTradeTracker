@@ -57,7 +57,7 @@ export default function Dashboard() {
     queryKey: ["/api/payments"],
   });
 
-  // Calculate lifecycle statistics
+  // Calculate lifecycle statistics with real-time data
   const lifecycleStats: LifecycleStats = {
     collection: inventory?.filter((item: any) => item.lifecycleStage === 'collection').length || 0,
     sorting: inventory?.filter((item: any) => item.lifecycleStage === 'sorting').length || 0,
