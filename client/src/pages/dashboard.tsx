@@ -16,7 +16,7 @@ import {
   Recycle,
   Factory
 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
 import { useAuth } from "@/hooks/use-auth";
 import AddInventoryModal from "@/components/modals/add-inventory-modal";
 import AddPartnerModal from "@/components/modals/add-partner-modal";
@@ -67,15 +67,7 @@ export default function Dashboard() {
     recycled: inventory?.filter((item: any) => item.lifecycleStage === 'recycled').length || 0,
   };
 
-  // Generate revenue trend data (in INR)
-  const revenueData = [
-    { month: 'Jan', revenue: 1245000 },
-    { month: 'Feb', revenue: 1535500 },
-    { month: 'Mar', revenue: 1826000 },
-    { month: 'Apr', revenue: 1643400 },
-    { month: 'May', revenue: 2041800 },
-    { month: 'Jun', revenue: stats?.monthlyRevenue || 1041650 },
-  ];
+
 
   const recentActivities = [
     {
@@ -171,32 +163,42 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Charts and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chart Section */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Revenue Trend</CardTitle>
-                <div className="flex space-x-2">
-                  <Button variant="default" size="sm">7D</Button>
-                  <Button variant="outline" size="sm">30D</Button>
-                  <Button variant="outline" size="sm">90D</Button>
+      {/* Revenue and Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Revenue Summary */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Revenue Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">₹{((stats?.monthlyRevenue || 0) / 100000).toFixed(1)}L</div>
+                  <div className="text-sm text-gray-600">Monthly Revenue</div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">{stats?.completedDeals || 0}</div>
+                  <div className="text-sm text-gray-600">Completed Deals</div>
+                </div>
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600">₹{((stats?.totalValue || 0) / 100000).toFixed(1)}L</div>
+                  <div className="text-sm text-gray-600">Total Deal Value</div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">{stats?.activePartnerships || 0}</div>
+                  <div className="text-sm text-gray-600">Active Partners</div>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <TrendingUp className="w-12 h-12 mx-auto mb-2" />
-                  <p>Revenue Chart</p>
-                  <p className="text-sm">Chart implementation with Recharts</p>
+              <div className="pt-4 border-t">
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>Revenue Growth</span>
+                  <span className="text-green-600 font-medium">+15.8% from last month</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Recent Activity */}
         <Card>
