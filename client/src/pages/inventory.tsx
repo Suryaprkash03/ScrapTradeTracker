@@ -91,9 +91,9 @@ export default function InventoryPage() {
   };
 
   const filteredInventory = inventory?.filter(item => {
-    const matchesMetalType = !filters.metalType || item.metalType === filters.metalType;
-    const matchesGrade = !filters.grade || item.grade === filters.grade;
-    const matchesStatus = !filters.status || item.status === filters.status;
+    const matchesMetalType = !filters.metalType || filters.metalType === "all" || item.metalType === filters.metalType;
+    const matchesGrade = !filters.grade || filters.grade === "all" || item.grade === filters.grade;
+    const matchesStatus = !filters.status || filters.status === "all" || item.status === filters.status;
     const matchesSearch = !filters.search || 
       item.itemId.toLowerCase().includes(filters.search.toLowerCase()) ||
       item.metalType.toLowerCase().includes(filters.search.toLowerCase());
@@ -123,7 +123,7 @@ export default function InventoryPage() {
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="Steel">Steel</SelectItem>
                   <SelectItem value="Aluminum">Aluminum</SelectItem>
                   <SelectItem value="Copper">Copper</SelectItem>
@@ -139,7 +139,7 @@ export default function InventoryPage() {
                   <SelectValue placeholder="All Grades" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Grades</SelectItem>
+                  <SelectItem value="all">All Grades</SelectItem>
                   <SelectItem value="Grade A">Grade A</SelectItem>
                   <SelectItem value="Grade B">Grade B</SelectItem>
                   <SelectItem value="Grade C">Grade C</SelectItem>
@@ -154,7 +154,7 @@ export default function InventoryPage() {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="available">Available</SelectItem>
                   <SelectItem value="reserved">Reserved</SelectItem>
                   <SelectItem value="sold">Sold</SelectItem>

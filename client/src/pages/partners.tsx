@@ -101,13 +101,14 @@ export default function PartnersPage() {
   };
 
   const filteredPartners = partners?.filter(partner => {
-    const matchesType = !filters.type || partner.type === filters.type;
+    const matchesType = !filters.type || filters.type === "all" || partner.type === filters.type;
+    const matchesStatus = !filters.status || filters.status === "all" || partner.status === filters.status;
     const matchesSearch = !filters.search || 
       partner.companyName.toLowerCase().includes(filters.search.toLowerCase()) ||
       partner.contactPerson.toLowerCase().includes(filters.search.toLowerCase()) ||
       partner.email.toLowerCase().includes(filters.search.toLowerCase());
     
-    return matchesType && matchesSearch;
+    return matchesType && matchesStatus && matchesSearch;
   });
 
   const totalSuppliers = partners?.filter(p => p.type === "supplier" || p.type === "both").length || 0;
