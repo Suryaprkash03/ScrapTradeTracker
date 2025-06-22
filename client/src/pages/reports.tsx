@@ -143,7 +143,7 @@ export default function ReportsPage() {
                   <Skeleton className="h-8 w-20 mt-1" />
                 ) : (
                   <p className="text-2xl font-bold text-gray-800">
-                    ${deals?.length ? Math.round(deals.reduce((sum, d) => sum + parseFloat(d.totalValue), 0) / deals.length / 1000) : 0}K
+                    ₹{deals?.length ? Math.round(deals.reduce((sum, d) => sum + parseFloat(d.totalValue), 0) * 83 / deals.length / 100000) : 0}L
                   </p>
                 )}
                 <p className="text-sm text-green-600 mt-1 flex items-center">
@@ -161,17 +161,26 @@ export default function ReportsPage() {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Monthly Scrap Volume Chart */}
+        {/* Monthly Scrap Volume */}
         <Card>
           <CardHeader>
             <CardTitle>Monthly Scrap Volume</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <BarChart3 className="w-12 h-12 mx-auto mb-2" />
-                <p>Volume Chart</p>
-                <p className="text-sm">Chart implementation with Recharts</p>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {Object.entries(metalTypeBreakdown).map(([type, quantity]) => (
+                  <div key={type} className="p-4 bg-gray-50 rounded-lg">
+                    <div className="text-lg font-semibold text-gray-900">{quantity.toLocaleString()} T</div>
+                    <div className="text-sm text-gray-600">{type}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="pt-4 border-t">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">Total Volume</span>
+                  <span className="text-lg font-bold text-gray-900">{monthlyVolume.toLocaleString()} T</span>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -210,17 +219,30 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
 
-        {/* Profit Per Deal Chart */}
+        {/* Profit Analysis */}
         <Card>
           <CardHeader>
             <CardTitle>Profit Analysis</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <TrendingUp className="w-12 h-12 mx-auto mb-2" />
-                <p>Profit Chart</p>
-                <p className="text-sm">Chart implementation with Recharts</p>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                {profitPerDeal.slice(0, 5).map((deal) => (
+                  <div key={deal.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm font-medium text-gray-600">{deal.id}</span>
+                    <span className="text-sm font-bold text-green-600">₹{(deal.profit * 83 / 100000).toFixed(1)}L</span>
+                  </div>
+                ))}
+              </div>
+              <div className="pt-4 border-t">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">Avg Profit/Deal</span>
+                  <span className="text-lg font-bold text-gray-900">
+                    ₹{profitPerDeal.length > 0 ? 
+                      ((profitPerDeal.reduce((sum, d) => sum + d.profit, 0) / profitPerDeal.length * 83) / 100000).toFixed(1) : 
+                      '0.0'}L
+                  </span>
+                </div>
               </div>
             </div>
           </CardContent>
