@@ -9,7 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit, Eye, FileText, DollarSign, Clock, CheckCircle, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import CreateDealModal from "@/components/modals/create-deal-modal";
-import EditDealModal from "@/components/modals/edit-deal-modal";
 import { apiRequest } from "@/lib/queryClient";
 import type { Deal, Partner, Inventory } from "@shared/schema";
 
@@ -90,7 +89,7 @@ export default function DealsPage() {
   };
 
   const filteredDeals = deals?.filter(deal => {
-    const matchesStatus = !filters.status || filters.status === "all" || deal.status === filters.status;
+    const matchesStatus = !filters.status || deal.status === filters.status;
     const matchesSearch = !filters.search || 
       deal.dealId.toLowerCase().includes(filters.search.toLowerCase()) ||
       getBuyerName(deal.buyerId).toLowerCase().includes(filters.search.toLowerCase());
@@ -184,7 +183,7 @@ export default function DealsPage() {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="">All Status</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="confirmed">Confirmed</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
@@ -275,11 +274,6 @@ export default function DealsPage() {
       </Card>
 
       <CreateDealModal open={showCreateModal} onOpenChange={setShowCreateModal} />
-      <EditDealModal 
-        open={showEditModal} 
-        onOpenChange={setShowEditModal}
-        deal={selectedDeal}
-      />
     </div>
   );
 }

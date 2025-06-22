@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Plus, Edit, Eye, Ship, Package, Clock, MapPin, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import EditShipmentModal from "@/components/modals/edit-shipment-modal";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -147,7 +146,7 @@ export default function ShipmentsPage() {
   };
 
   const filteredShipments = shipments?.filter(shipment => {
-    const matchesStatus = !filters.status || filters.status === "all" || shipment.status === filters.status;
+    const matchesStatus = !filters.status || shipment.status === filters.status;
     const matchesSearch = !filters.search || 
       (shipment.containerNo?.toLowerCase().includes(filters.search.toLowerCase())) ||
       (shipment.vesselName?.toLowerCase().includes(filters.search.toLowerCase())) ||
@@ -242,7 +241,7 @@ export default function ShipmentsPage() {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="">All Status</SelectItem>
                   <SelectItem value="preparation">Preparation</SelectItem>
                   <SelectItem value="pickup">Pickup</SelectItem>
                   <SelectItem value="gate_in">Gate In</SelectItem>
@@ -418,11 +417,6 @@ export default function ShipmentsPage() {
           </form>
         </DialogContent>
       </Dialog>
-      <EditShipmentModal 
-        open={showEditModal} 
-        onOpenChange={setShowEditModal}
-        shipment={selectedShipment}
-      />
     </div>
   );
 }

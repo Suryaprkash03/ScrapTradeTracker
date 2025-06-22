@@ -9,7 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit, Eye, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AddInventoryModal from "@/components/modals/add-inventory-modal";
-import EditInventoryModal from "@/components/modals/edit-inventory-modal";
 import { apiRequest } from "@/lib/queryClient";
 import type { Inventory } from "@shared/schema";
 
@@ -267,11 +266,6 @@ export default function InventoryPage() {
       </Card>
 
       <AddInventoryModal open={showAddModal} onOpenChange={setShowAddModal} />
-      <EditInventoryModal 
-        open={showEditModal} 
-        onOpenChange={setShowEditModal}
-        inventory={selectedItem}
-      />
     </div>
   );
 }

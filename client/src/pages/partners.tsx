@@ -279,11 +279,6 @@ export default function PartnersPage() {
       </Card>
 
       <AddPartnerModal open={showAddModal} onOpenChange={setShowAddModal} />
-      <EditPartnerModal 
-        open={showEditModal} 
-        onOpenChange={setShowEditModal}
-        partner={selectedPartner}
-      />
     </div>
   );
 }
