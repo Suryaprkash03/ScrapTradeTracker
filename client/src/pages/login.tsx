@@ -49,7 +49,7 @@ export default function Login() {
       } else if (data.user.role === "yard_staff") {
         setLocation("/inventory");
       } else {
-        setLocation("/dashboard");
+        setLocation("/admin-dashboard");
       }
     },
     onError: (error: any) => {
