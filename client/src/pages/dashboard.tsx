@@ -12,7 +12,9 @@ import {
   Clock,
   CheckCircle,
   UserPlus,
-  FileOutput
+  FileOutput,
+  Recycle,
+  Factory
 } from "lucide-react";
 import AddInventoryModal from "@/components/modals/add-inventory-modal";
 import AddPartnerModal from "@/components/modals/add-partner-modal";
@@ -43,6 +45,20 @@ export default function Dashboard() {
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/stats"],
   });
+
+  const { data: inventory } = useQuery({
+    queryKey: ["/api/inventory"],
+  });
+
+  // Calculate lifecycle statistics
+  const lifecycleStats: LifecycleStats = {
+    collection: inventory?.filter((item: any) => item.lifecycleStage === 'collection').length || 0,
+    sorting: inventory?.filter((item: any) => item.lifecycleStage === 'sorting').length || 0,
+    cleaning: inventory?.filter((item: any) => item.lifecycleStage === 'cleaning').length || 0,
+    melting: inventory?.filter((item: any) => item.lifecycleStage === 'melting').length || 0,
+    distribution: inventory?.filter((item: any) => item.lifecycleStage === 'distribution').length || 0,
+    recycled: inventory?.filter((item: any) => item.lifecycleStage === 'recycled').length || 0,
+  };
 
   const recentActivities = [
     {
