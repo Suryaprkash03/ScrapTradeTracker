@@ -1,4 +1,4 @@
-import { insertDealSchema, insertInventorySchema, insertPartnerSchema, insertPaymentSchema, insertQualityCheckSchema, insertShipmentSchema, insertUserSchema, insertLifecycleUpdateSchema } from "@shared/schema";
+import { insertDealSchema, insertInventorySchema, insertPartnerSchema, insertPaymentSchema, insertQualityCheckSchema, insertShipmentSchema, insertUserSchema } from "@shared/schema";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
@@ -371,7 +371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const partners = await storage.getAllPartners();
       const shipments = await storage.getAllShipments();
       const lifecycleUpdates = await storage.getAllLifecycleUpdates();
-
+      console.log(lifecycleUpdates)
       // Calculate lifecycle stage distribution
       const lifecycleStages = inventory.reduce((acc, item) => {
         const stage = item.lifecycleStage || 'collection';
