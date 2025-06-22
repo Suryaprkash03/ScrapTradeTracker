@@ -108,7 +108,7 @@ export default function Dashboard() {
       iconColor: "text-emerald-600",
       iconBg: "bg-gradient-to-br from-emerald-50 to-emerald-100",
       title: "Deal #D-2024-001 confirmed",
-      description: "₹2.4M contract finalized",
+      description: "$2.4M contract finalized",
       time: "4 hours ago",
       type: "deal",
       priority: "medium",
@@ -289,7 +289,7 @@ export default function Dashboard() {
           <StatCard
             icon={DollarSign}
             title="Monthly Revenue"
-            value={`₹${((stats?.monthlyRevenue || 0) / 1000000).toFixed(1)}M`}
+            value={`$${((stats?.monthlyRevenue || 0) / 1000000).toFixed(1)}M`}
             subtitle="Current month earnings"
             trend="up"
             trendValue="+15.8%"
@@ -331,7 +331,7 @@ export default function Dashboard() {
                   <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="relative">
                     <div className="text-2xl font-bold text-indigo-700 mb-1">
-                      ₹{((stats?.monthlyRevenue || 0) / 1000000).toFixed(1)}M
+                      ${((stats?.monthlyRevenue || 0) / 1000000).toFixed(1)}M
                     </div>
                     <div className="text-sm text-indigo-600 font-semibold">Monthly Revenue</div>
                   </div>
@@ -347,7 +347,7 @@ export default function Dashboard() {
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="relative">
                     <div className="text-2xl font-bold text-amber-700 mb-1">
-                      ₹{((stats?.totalValue || 0) / 100000).toFixed(1)}L
+                      ${((stats?.totalValue || 0) / 100000).toFixed(1)}L
                     </div>
                     <div className="text-sm text-amber-600 font-semibold">Total Deal Value</div>
                   </div>
