@@ -16,6 +16,8 @@ import {
   Recycle,
   Factory
 } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useAuth } from "@/hooks/use-auth";
 import AddInventoryModal from "@/components/modals/add-inventory-modal";
 import AddPartnerModal from "@/components/modals/add-partner-modal";
 import CreateDealModal from "@/components/modals/create-deal-modal";
@@ -38,6 +40,7 @@ interface LifecycleStats {
 }
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [showAddInventory, setShowAddInventory] = useState(false);
   const [showAddPartner, setShowAddPartner] = useState(false);
   const [showCreateDeal, setShowCreateDeal] = useState(false);
@@ -50,6 +53,10 @@ export default function Dashboard() {
     queryKey: ["/api/inventory"],
   });
 
+  const { data: payments } = useQuery({
+    queryKey: ["/api/payments"],
+  });
+
   // Calculate lifecycle statistics
   const lifecycleStats: LifecycleStats = {
     collection: inventory?.filter((item: any) => item.lifecycleStage === 'collection').length || 0,
@@ -59,6 +66,16 @@ export default function Dashboard() {
     distribution: inventory?.filter((item: any) => item.lifecycleStage === 'distribution').length || 0,
     recycled: inventory?.filter((item: any) => item.lifecycleStage === 'recycled').length || 0,
   };
+
+  // Generate revenue trend data
+  const revenueData = [
+    { month: 'Jan', revenue: 15000 },
+    { month: 'Feb', revenue: 18500 },
+    { month: 'Mar', revenue: 22000 },
+    { month: 'Apr', revenue: 19800 },
+    { month: 'May', revenue: 24600 },
+    { month: 'Jun', revenue: stats?.monthlyRevenue || 12550 },
+  ];
 
   const recentActivities = [
     {
