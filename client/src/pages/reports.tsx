@@ -4,9 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart3, TrendingUp, FileText, Download, Calendar } from "lucide-react";
+import { generateReport } from "@/lib/reportGenerator";
+import { useToast } from "@/hooks/use-toast";
 import type { Deal, Inventory, Partner, Shipment } from "@shared/schema";
 
 export default function ReportsPage() {
+  const { toast } = useToast();
   const { data: deals, isLoading: dealsLoading } = useQuery<Deal[]>({
     queryKey: ["/api/deals"],
   });
@@ -38,8 +41,41 @@ export default function ReportsPage() {
     return acc;
   }, {} as Record<string, number>) || {};
 
-  const generateReport = (reportType: string) => {
-    alert(`Generating ${reportType} report. In a real application, this would create a PDF using jsPDF and download it.`);
+  const handleGenerateReport = async (reportType: string) => {
+    try {
+      let type = '';
+      switch (reportType) {
+        case 'Inventory Summary':
+          type = 'inventory';
+          break;
+        case 'Financial Report':
+          type = 'financial';
+          break;
+        case 'Partner Analysis':
+          type = 'partners';
+          break;
+        case 'Shipment Report':
+          type = 'operations';
+          break;
+        case 'Summary':
+          type = 'inventory'; // Default to inventory for summary
+          break;
+        default:
+          type = 'inventory';
+      }
+      
+      await generateReport(type);
+      toast({
+        title: "Report Generated",
+        description: `${reportType} has been downloaded successfully.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate report. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -59,7 +95,7 @@ export default function ReportsPage() {
               <SelectItem value="1y">Last year</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={() => generateReport("Summary")}>
+          <Button onClick={() => handleGenerateReport("Summary")}>
             <Download className="w-4 h-4 mr-2" />
             Export Report
           </Button>
@@ -287,7 +323,7 @@ export default function ReportsPage() {
             <Button
               variant="outline"
               className="h-20 flex flex-col items-center justify-center space-y-2"
-              onClick={() => generateReport("Inventory Summary")}
+              onClick={() => handleGenerateReport("Inventory Summary")}
             >
               <FileText className="w-6 h-6 text-primary" />
               <span className="text-sm">Inventory Summary</span>
@@ -296,7 +332,7 @@ export default function ReportsPage() {
             <Button
               variant="outline"
               className="h-20 flex flex-col items-center justify-center space-y-2"
-              onClick={() => generateReport("Financial Report")}
+              onClick={() => handleGenerateReport("Financial Report")}
             >
               <FileText className="w-6 h-6 text-primary" />
               <span className="text-sm">Financial Report</span>
@@ -305,7 +341,7 @@ export default function ReportsPage() {
             <Button
               variant="outline"
               className="h-20 flex flex-col items-center justify-center space-y-2"
-              onClick={() => generateReport("Partner Analysis")}
+              onClick={() => handleGenerateReport("Partner Analysis")}
             >
               <FileText className="w-6 h-6 text-primary" />
               <span className="text-sm">Partner Analysis</span>
@@ -314,7 +350,7 @@ export default function ReportsPage() {
             <Button
               variant="outline"
               className="h-20 flex flex-col items-center justify-center space-y-2"
-              onClick={() => generateReport("Shipment Report")}
+              onClick={() => handleGenerateReport("Shipment Report")}
             >
               <FileText className="w-6 h-6 text-primary" />
               <span className="text-sm">Shipment Report</span>
