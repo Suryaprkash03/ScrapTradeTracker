@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { hasPermission, DOCUMENT_TYPES } from "@/lib/permissions";
-import { FileText, Upload, CheckCircle, XCircle, Clock } from "lucide-react";
+import { FileText, Upload, CheckCircle, XCircle, Clock, Eye, Download } from "lucide-react";
 import type { Document, Deal } from "@shared/schema";
 
 interface DocumentUploadData {
@@ -28,6 +28,7 @@ export default function DocumentManager() {
   const [uploadData, setUploadData] = useState<Partial<DocumentUploadData>>({});
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [viewDocumentDialogOpen, setViewDocumentDialogOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   
@@ -166,6 +167,60 @@ export default function DocumentManager() {
     }
   };
 
+  const openDocumentViewer = (doc: Document) => {
+    setSelectedDocument(doc);
+    setViewDocumentDialogOpen(true);
+  };
+
+  const getFileExtension = (fileName: string) => {
+    return fileName.split('.').pop()?.toLowerCase() || '';
+  };
+
+  const renderDocumentPreview = (doc: Document) => {
+    const extension = getFileExtension(doc.fileName);
+    
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+      return (
+        <div className="flex justify-center p-4">
+          <img 
+            src={doc.filePath} 
+            alt={doc.fileName}
+            className="max-w-full max-h-96 object-contain border rounded"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              target.nextElementSibling!.classList.remove('hidden');
+            }}
+          />
+          <div className="hidden text-center p-8 text-gray-500">
+            <FileText className="w-16 h-16 mx-auto mb-4" />
+            <p>Image preview not available</p>
+            <p className="text-sm">File: {doc.fileName}</p>
+          </div>
+        </div>
+      );
+    } else if (extension === 'pdf') {
+      return (
+        <div className="flex justify-center p-4">
+          <iframe
+            src={doc.filePath}
+            className="w-full h-96 border rounded"
+            title={doc.fileName}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="text-center p-8 text-gray-500">
+          <FileText className="w-16 h-16 mx-auto mb-4" />
+          <p>Preview not available for this file type</p>
+          <p className="text-sm">File: {doc.fileName}</p>
+          <p className="text-xs">Type: {extension.toUpperCase()}</p>
+        </div>
+      );
+    }
+  };
+
   const canUploadDocuments = hasPermission(user?.role || '', 'upload_documents');
   const canApproveDocuments = hasPermission(user?.role || '', 'approve_deals');
 
@@ -288,18 +343,28 @@ export default function DocumentManager() {
                       {doc.status}
                     </Badge>
                   </div>
-                  {canApproveDocuments && doc.status === 'pending' && (
+                  <div className="flex space-x-2">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      onClick={() => {
-                        setSelectedDocument(doc);
-                        setApprovalDialogOpen(true);
-                      }}
+                      onClick={() => openDocumentViewer(doc)}
                     >
-                      Review
+                      <Eye className="w-4 h-4 mr-1" />
+                      View
                     </Button>
-                  )}
+                    {canApproveDocuments && doc.status === 'pending' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedDocument(doc);
+                          setApprovalDialogOpen(true);
+                        }}
+                      >
+                        Review
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
               {doc.status === 'rejected' && doc.rejectionReason && (
@@ -314,25 +379,130 @@ export default function DocumentManager() {
         ))}
       </div>
 
+      {/* Document Viewer Dialog */}
+      <Dialog open={viewDocumentDialogOpen} onOpenChange={setViewDocumentDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <div>
+                <span>Document Viewer - {selectedDocument?.fileName}</span>
+                <p className="text-sm text-muted-foreground font-normal">
+                  {DOCUMENT_TYPES.find(t => t.value === selectedDocument?.documentType)?.label}
+                </p>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (selectedDocument?.filePath) {
+                      window.open(selectedDocument.filePath, '_blank');
+                    }
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-1" />
+                  Download
+                </Button>
+                {canApproveDocuments && selectedDocument?.status === 'pending' && (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setViewDocumentDialogOpen(false);
+                      setApprovalDialogOpen(true);
+                    }}
+                  >
+                    Review & Approve
+                  </Button>
+                )}
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedDocument && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded">
+                <div>
+                  <p className="text-sm font-medium">Deal ID</p>
+                  <p className="text-sm text-gray-600">
+                    {deals.find((d: Deal) => d.id === selectedDocument.dealId)?.dealId || selectedDocument.dealId}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Document Type</p>
+                  <p className="text-sm text-gray-600">
+                    {DOCUMENT_TYPES.find(t => t.value === selectedDocument.documentType)?.label || selectedDocument.documentType}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">File Size</p>
+                  <p className="text-sm text-gray-600">
+                    {selectedDocument.fileSize ? `${(selectedDocument.fileSize / 1024).toFixed(1)} KB` : 'Unknown'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Status</p>
+                  <div className="flex items-center space-x-2">
+                    {getStatusIcon(selectedDocument.status)}
+                    <Badge className={getStatusColor(selectedDocument.status)}>
+                      {selectedDocument.status}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border rounded-lg">
+                {renderDocumentPreview(selectedDocument)}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Document Approval Dialog */}
       <Dialog open={approvalDialogOpen} onOpenChange={setApprovalDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Review Document</DialogTitle>
             <DialogDescription>
-              {selectedDocument?.fileName}
+              Make a decision on: {selectedDocument?.fileName}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded">
+              <p className="text-sm text-blue-800">
+                <strong>Document:</strong> {selectedDocument?.fileName}
+              </p>
+              <p className="text-sm text-blue-800">
+                <strong>Type:</strong> {DOCUMENT_TYPES.find(t => t.value === selectedDocument?.documentType)?.label}
+              </p>
+              <p className="text-sm text-blue-800">
+                <strong>Deal:</strong> {deals.find((d: Deal) => d.id === selectedDocument?.dealId)?.dealId}
+              </p>
+            </div>
+            
             <div className="grid gap-2">
-              <Label htmlFor="rejectionReason">Rejection Reason (if rejecting)</Label>
+              <Label htmlFor="rejectionReason">Rejection Reason (required if rejecting)</Label>
               <Textarea
                 id="rejectionReason"
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Enter reason for rejection..."
+                placeholder="Enter detailed reason for rejection..."
                 rows={3}
               />
+            </div>
+            
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setApprovalDialogOpen(false);
+                  setViewDocumentDialogOpen(true);
+                }}
+              >
+                <Eye className="w-4 h-4 mr-1" />
+                View Document Again
+              </Button>
             </div>
           </div>
           <DialogFooter className="space-x-2">
