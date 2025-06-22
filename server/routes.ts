@@ -299,6 +299,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Report generation endpoint
+  app.get("/api/reports/:type", async (req, res) => {
+    try {
+      const { type } = req.params;
+      const inventory = await storage.getAllInventory();
+      const deals = await storage.getAllDeals();
+      const partners = await storage.getAllPartners();
+      const shipments = await storage.getAllShipments();
+      const payments = await storage.getAllPayments();
+
+      let reportData = {};
+
+      switch (type) {
+        case 'inventory':
+          reportData = {
+            title: 'Inventory Summary Report',
+            generatedAt: new Date().toISOString(),
+            data: {
+              totalItems: inventory.length,
+              totalQuantity: inventory.reduce((sum, item) => sum + parseFloat(item.quantity), 0),
+              byMetalType: inventory.reduce((acc, item) => {
+                acc[item.metalType] = (acc[item.metalType] || 0) + parseFloat(item.quantity);
+                return acc;
+              }, {}),
+              byGrade: inventory.reduce((acc, item) => {
+                acc[item.grade] = (acc[item.grade] || 0) + 1;
+                return acc;
+              }, {}),
+              byStatus: inventory.reduce((acc, item) => {
+                acc[item.status] = (acc[item.status] || 0) + 1;
+                return acc;
+              }, {}),
+              items: inventory
+            }
+          };
+          break;
+
+        case 'financial':
+          const totalRevenue = deals.reduce((sum, deal) => sum + parseFloat(deal.totalValue), 0);
+          const completedRevenue = deals
+            .filter(deal => deal.status === 'completed')
+            .reduce((sum, deal) => sum + parseFloat(deal.totalValue), 0);
+          
+          reportData = {
+            title: 'Financial Report',
+            generatedAt: new Date().toISOString(),
+            data: {
+              totalRevenue,
+              completedRevenue,
+              pendingRevenue: totalRevenue - completedRevenue,
+              totalDeals: deals.length,
+              completedDeals: deals.filter(deal => deal.status === 'completed').length,
+              avgDealValue: totalRevenue / deals.length || 0,
+              deals,
+              payments
+            }
+          };
+          break;
+
+        case 'partners':
+          reportData = {
+            title: 'Partner Analysis Report',
+            generatedAt: new Date().toISOString(),
+            data: {
+              totalPartners: partners.length,
+              activePartners: partners.filter(p => p.status === 'active').length,
+              suppliers: partners.filter(p => p.type === 'supplier' || p.type === 'both').length,
+              buyers: partners.filter(p => p.type === 'buyer' || p.type === 'both').length,
+              byCountry: partners.reduce((acc, partner) => {
+                acc[partner.country] = (acc[partner.country] || 0) + 1;
+                return acc;
+              }, {}),
+              partners
+            }
+          };
+          break;
+
+        case 'operations':
+          reportData = {
+            title: 'Operations Report',
+            generatedAt: new Date().toISOString(),
+            data: {
+              totalShipments: shipments.length,
+              activeShipments: shipments.filter(s => s.status !== 'delivered').length,
+              completedShipments: shipments.filter(s => s.status === 'delivered').length,
+              onTimeDeliveries: shipments.filter(s => s.status === 'delivered').length,
+              shipments,
+              deals: deals.filter(deal => deal.status !== 'draft')
+            }
+          };
+          break;
+
+        default:
+          return res.status(400).json({ message: "Invalid report type" });
+      }
+
+      res.json(reportData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate report" });
+    }
+  });
+
   // Documents routes
   app.get('/api/documents', async (req, res) => {
     try {

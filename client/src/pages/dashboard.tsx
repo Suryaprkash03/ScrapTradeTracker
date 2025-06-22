@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/use-auth";
 import AddInventoryModal from "@/components/modals/add-inventory-modal";
 import AddPartnerModal from "@/components/modals/add-partner-modal";
 import CreateDealModal from "@/components/modals/create-deal-modal";
+import ReportGenerationModal from "@/components/modals/report-generation-modal";
 import { useState } from "react";
 
 interface DashboardStats {
@@ -44,6 +45,7 @@ export default function Dashboard() {
   const [showAddInventory, setShowAddInventory] = useState(false);
   const [showAddPartner, setShowAddPartner] = useState(false);
   const [showCreateDeal, setShowCreateDeal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/stats"],
@@ -263,7 +265,7 @@ export default function Dashboard() {
             <Button
               variant="outline"
               className="h-24 flex flex-col items-center justify-center space-y-2 border-dashed hover:border-primary hover:bg-blue-50"
-              onClick={() => alert("Report generation functionality would be implemented here")}
+              onClick={() => setShowReportModal(true)}
             >
               <FileOutput className="w-6 h-6 text-primary" />
               <span className="text-sm font-medium">Generate Report</span>
@@ -276,6 +278,7 @@ export default function Dashboard() {
       <AddInventoryModal open={showAddInventory} onOpenChange={setShowAddInventory} />
       <AddPartnerModal open={showAddPartner} onOpenChange={setShowAddPartner} />
       <CreateDealModal open={showCreateDeal} onOpenChange={setShowCreateDeal} />
+      <ReportGenerationModal open={showReportModal} onOpenChange={setShowReportModal} />
     </div>
   );
 }
