@@ -39,6 +39,10 @@ export const inventory = pgTable("inventory", {
   status: text("status").notNull().default("available"), // available, reserved, sold
   inspectionNotes: text("inspection_notes"),
   qualityReports: jsonb("quality_reports").default([]),
+  lifecycleStage: text("lifecycle_stage").default("collection"), // collection, sorting, cleaning, melting, distribution
+  barcode: text("barcode"),
+  qrCode: text("qr_code"),
+  batchNumber: text("batch_number"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -189,3 +193,26 @@ export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 
 export type Setting = typeof settings.$inferSelect;
 export type InsertSetting = z.infer<typeof insertSettingSchema>;
+
+// Lifecycle Updates table for tracking inventory stage changes
+export const lifecycleUpdates = pgTable("lifecycle_updates", {
+  id: serial("id").primaryKey(),
+  inventoryId: integer("inventory_id").notNull(),
+  previousStage: text("previous_stage"),
+  newStage: text("new_stage").notNull(),
+  status: text("status").notNull(),
+  barcode: text("barcode"),
+  qrCode: text("qr_code"),
+  batchNumber: text("batch_number"),
+  inspectionNotes: text("inspection_notes"),
+  updatedBy: integer("updated_by"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertLifecycleUpdateSchema = createInsertSchema(lifecycleUpdates).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type LifecycleUpdate = typeof lifecycleUpdates.$inferSelect;
+export type InsertLifecycleUpdate = z.infer<typeof insertLifecycleUpdateSchema>;

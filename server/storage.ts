@@ -68,6 +68,11 @@ export interface IStorage {
   getAllSettings(): Promise<Setting[]>;
   updateSetting(key: string, value: any, description?: string, updatedBy?: number): Promise<Setting>;
   deleteSetting(key: string): Promise<boolean>;
+
+  // Lifecycle Updates
+  createLifecycleUpdate(update: InsertLifecycleUpdate): Promise<LifecycleUpdate>;
+  getAllLifecycleUpdates(): Promise<LifecycleUpdate[]>;
+  getLifecycleUpdatesByInventory(inventoryId: number): Promise<LifecycleUpdate[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -505,6 +510,23 @@ export class DatabaseStorage implements IStorage {
   async deleteSetting(key: string): Promise<boolean> {
     const result = await db.delete(settings).where(eq(settings.key, key));
     return result.rowCount > 0;
+  }
+
+  // Lifecycle Updates
+  async createLifecycleUpdate(update: InsertLifecycleUpdate): Promise<LifecycleUpdate> {
+    const [lifecycleUpdate] = await db.insert(lifecycleUpdates).values(update).returning();
+    return lifecycleUpdate;
+  }
+
+  async getAllLifecycleUpdates(): Promise<LifecycleUpdate[]> {
+    return await db.select().from(lifecycleUpdates)
+      .orderBy(lifecycleUpdates.updatedAt);
+  }
+
+  async getLifecycleUpdatesByInventory(inventoryId: number): Promise<LifecycleUpdate[]> {
+    return await db.select().from(lifecycleUpdates)
+      .where(eq(lifecycleUpdates.inventoryId, inventoryId))
+      .orderBy(lifecycleUpdates.updatedAt);
   }
 }
 

@@ -1,4 +1,4 @@
-import { insertDealSchema, insertInventorySchema, insertPartnerSchema, insertPaymentSchema, insertQualityCheckSchema, insertShipmentSchema, insertUserSchema } from "@shared/schema";
+import { insertDealSchema, insertInventorySchema, insertPartnerSchema, insertPaymentSchema, insertQualityCheckSchema, insertShipmentSchema, insertUserSchema, insertLifecycleUpdateSchema } from "@shared/schema";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
@@ -190,6 +190,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Lifecycle update route for inventory
+  app.patch("/api/inventory/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updateData = req.body;
+      
+      // Get current inventory item to track previous stage
+      const currentItem = await storage.getInventoryItem(id);
+      if (!currentItem) {
+        return res.status(404).json({ message: "Inventory item not found" });
+      }
+
+      // Update inventory with new lifecycle data
+      const updatedItem = await storage.updateInventoryItem(id, {
+        lifecycleStage: updateData.lifecycleStage,
+        status: updateData.status,
+        barcode: updateData.barcode,
+        qrCode: updateData.qrCode,
+        batchNumber: updateData.batchNumber,
+        inspectionNotes: updateData.inspectionNotes
+      });
+
+      // Create lifecycle update record
+      await storage.createLifecycleUpdate({
+        inventoryId: id,
+        previousStage: currentItem.lifecycleStage,
+        newStage: updateData.lifecycleStage,
+        status: updateData.status,
+        barcode: updateData.barcode,
+        qrCode: updateData.qrCode,
+        batchNumber: updateData.batchNumber,
+        inspectionNotes: updateData.inspectionNotes,
+        updatedBy: 3 // Default to yard staff for now
+      });
+
+      res.json(updatedItem);
+    } catch (error) {
+      console.error("Lifecycle update error:", error);
+      res.status(400).json({ message: "Failed to update lifecycle" });
+    }
+  });
+
   app.delete("/api/inventory/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -302,12 +344,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Statistics endpoint for dashboard
+  // Lifecycle tracking routes
+  app.get("/api/lifecycle-updates", async (req, res) => {
+    try {
+      const updates = await storage.getAllLifecycleUpdates();
+      res.json(updates);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch lifecycle updates" });
+    }
+  });
+
+  app.get("/api/lifecycle-updates/:inventoryId", async (req, res) => {
+    try {
+      const inventoryId = parseInt(req.params.inventoryId);
+      const updates = await storage.getLifecycleUpdatesByInventory(inventoryId);
+      res.json(updates);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inventory lifecycle updates" });
+    }
+  });
+
   app.get("/api/stats", async (req, res) => {
     try {
       const inventory = await storage.getAllInventory();
       const deals = await storage.getAllDeals();
       const partners = await storage.getAllPartners();
       const shipments = await storage.getAllShipments();
+      const lifecycleUpdates = await storage.getAllLifecycleUpdates();
+
+      // Calculate lifecycle stage distribution
+      const lifecycleStages = inventory.reduce((acc, item) => {
+        const stage = item.lifecycleStage || 'collection';
+        acc[stage] = (acc[stage] || 0) + 1;
+        return acc;
+      }, {});
+
+      // Recent lifecycle activity (last 7 days)
+      const recentUpdates = lifecycleUpdates.filter(update => {
+        const updateDate = new Date(update.updatedAt);
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return updateDate >= weekAgo;
+      });
 
       const stats = {
         totalInventory: inventory.length,
@@ -322,6 +400,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalDeals: deals.length,
         completedDeals: deals.filter(deal => deal.status === 'completed').length,
         totalValue: deals.reduce((total, deal) => total + parseFloat(deal.totalValue), 0),
+        lifecycleStages,
+        recentLifecycleUpdates: recentUpdates.length,
+        totalLifecycleUpdates: lifecycleUpdates.length,
       };
 
       res.json(stats);

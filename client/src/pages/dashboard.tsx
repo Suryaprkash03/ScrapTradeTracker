@@ -11,7 +11,10 @@ import {
   Plus,
   Ship,
   TrendingUp,
-  UserPlus
+  UserPlus,
+  Recycle,
+  Activity,
+  BarChart3
 } from "lucide-react";
 
 import AddInventoryModal from "@/components/modals/add-inventory-modal";
@@ -26,6 +29,9 @@ interface DashboardStats {
   activeDeals: number;
   monthlyRevenue: number;
   pendingShipments: number;
+  lifecycleStages: Record<string, number>;
+  recentLifecycleUpdates: number;
+  totalLifecycleUpdates: number;
 }
 
 interface LifecycleStats {
@@ -56,14 +62,18 @@ export default function Dashboard() {
     queryKey: ["/api/payments"],
   });
 
+  const { data: lifecycleUpdates } = useQuery({
+    queryKey: ["/api/lifecycle-updates"],
+  });
+
   // Calculate lifecycle statistics with real-time data
   const lifecycleStats: LifecycleStats = {
-    collection: inventory?.filter((item: any) => item.lifecycleStage === 'collection').length || 0,
-    sorting: inventory?.filter((item: any) => item.lifecycleStage === 'sorting').length || 0,
-    cleaning: inventory?.filter((item: any) => item.lifecycleStage === 'cleaning').length || 0,
-    melting: inventory?.filter((item: any) => item.lifecycleStage === 'melting').length || 0,
-    distribution: inventory?.filter((item: any) => item.lifecycleStage === 'distribution').length || 0,
-    recycled: inventory?.filter((item: any) => item.lifecycleStage === 'recycled').length || 0,
+    collection: stats?.lifecycleStages?.collection || 0,
+    sorting: stats?.lifecycleStages?.sorting || 0,
+    cleaning: stats?.lifecycleStages?.cleaning || 0,
+    melting: stats?.lifecycleStages?.melting || 0,
+    distribution: stats?.lifecycleStages?.distribution || 0,
+    recycled: stats?.lifecycleStages?.recycled || 0,
   };
 
 
@@ -224,6 +234,107 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Scrap Lifecycle Management - Admin View */}
+      {user?.role === 'admin' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Lifecycle Stages Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Recycle className="w-5 h-5" />
+                <span>Scrap Lifecycle Overview</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <div className="text-xl font-bold text-blue-600">{lifecycleStats.collection}</div>
+                    <div className="text-xs text-gray-600">Collection</div>
+                  </div>
+                  <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                    <div className="text-xl font-bold text-yellow-600">{lifecycleStats.sorting}</div>
+                    <div className="text-xs text-gray-600">Sorting</div>
+                  </div>
+                  <div className="text-center p-3 bg-orange-50 rounded-lg">
+                    <div className="text-xl font-bold text-orange-600">{lifecycleStats.cleaning}</div>
+                    <div className="text-xs text-gray-600">Cleaning</div>
+                  </div>
+                  <div className="text-center p-3 bg-red-50 rounded-lg">
+                    <div className="text-xl font-bold text-red-600">{lifecycleStats.melting}</div>
+                    <div className="text-xs text-gray-600">Melting</div>
+                  </div>
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <div className="text-xl font-bold text-green-600">{lifecycleStats.distribution}</div>
+                    <div className="text-xs text-gray-600">Distribution</div>
+                  </div>
+                  <div className="text-center p-3 bg-purple-50 rounded-lg">
+                    <div className="text-xl font-bold text-purple-600">{lifecycleStats.recycled}</div>
+                    <div className="text-xs text-gray-600">Recycled</div>
+                  </div>
+                </div>
+                <div className="pt-3 border-t">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Total Inventory Items</span>
+                    <span className="font-medium">{stats?.totalInventory || 0}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Lifecycle Updates */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Activity className="w-5 h-5" />
+                <span>Recent Lifecycle Updates</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {lifecycleUpdates?.slice(0, 6).map((update: any) => (
+                  <div key={update.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm font-medium">
+                          {update.previousStage ? `${update.previousStage} → ${update.newStage}` : update.newStage}
+                        </span>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                          {update.status}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        Inventory ID: {update.inventoryId} • {new Date(update.updatedAt).toLocaleDateString()}
+                      </div>
+                      {update.inspectionNotes && (
+                        <div className="text-xs text-gray-500 mt-1 truncate">
+                          {update.inspectionNotes}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )) || (
+                  <div className="text-center text-gray-500 py-4">
+                    No recent lifecycle updates
+                  </div>
+                )}
+                <div className="pt-3 border-t">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Recent Updates (7 days)</span>
+                    <span className="font-medium">{stats?.recentLifecycleUpdates || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm mt-1">
+                    <span className="text-gray-600">Total Updates</span>
+                    <span className="font-medium">{stats?.totalLifecycleUpdates || 0}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <Card>
