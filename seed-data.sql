@@ -20,17 +20,17 @@ INSERT INTO partners (company_name, contact_person, email, phone, country, addre
 ('Nordic Recycling', 'Erik Nordstrom', 'erik@nordicrecycling.se', '+46-8-123-4567', 'Sweden', 'Stockholm Industrial Park, 11122 Stockholm', 'buyer', 'active');
 
 -- Insert Inventory Items with lifecycle stages
-INSERT INTO inventory (item_id, metal_type, grade, quantity, unit, ferrous_type, location, status, lifecycle_stage, inspection_notes) VALUES
-('INV-001', 'Aluminum', 'Grade A', '500', 'KG', 'non_ferrous', 'Warehouse A, Section 1', 'available', 'collection', 'High-grade aluminum cans and sheets'),
-('INV-002', 'Copper', 'Grade A', '750', 'KG', 'non_ferrous', 'Warehouse A, Section 2', 'available', 'sorting', 'High purity copper wire from electronics'),
-('INV-003', 'Steel', 'Grade B', '1500', 'KG', 'ferrous', 'Warehouse B, Section 1', 'reserved', 'cleaning', 'Mixed steel scrap from construction'),
-('INV-004', 'Brass', 'Grade A', '400', 'KG', 'non_ferrous', 'Warehouse C, Section 1', 'available', 'melting', 'Clean brass fittings and pipes'),
-('INV-005', 'Iron', 'Grade C', '800', 'KG', 'ferrous', 'Warehouse D, Section 2', 'available', 'distribution', 'Iron scraps from automotive parts'),
-('INV-006', 'Aluminum', 'Grade A', '600', 'KG', 'non_ferrous', 'Warehouse E, Section 1', 'sold', 'recycled', 'Processed aluminum sheets and cans'),
-('INV-007', 'Copper', 'Grade B', '950', 'KG', 'non_ferrous', 'Warehouse A, Section 3', 'available', 'collection', 'Mixed copper cables and wires'),
-('INV-008', 'Steel', 'Grade A', '2200', 'KG', 'ferrous', 'Warehouse B, Section 2', 'reserved', 'sorting', 'High-grade steel from industrial machinery'),
-('INV-009', 'Brass', 'Grade B', '320', 'KG', 'non_ferrous', 'Warehouse C, Section 2', 'available', 'cleaning', 'Mixed brass components'),
-('INV-010', 'Iron', 'Grade B', '1100', 'KG', 'ferrous', 'Warehouse D, Section 1', 'available', 'melting', 'Clean iron sheets and rods');
+INSERT INTO inventory (item_id, metal_type, grade, quantity, unit, ferrous_type, location, status, inspection_notes) VALUES
+('INV-001', 'Aluminum', 'Grade A', '500', 'KG', 'non_ferrous', 'Warehouse A, Section 1', 'available',  'High-grade aluminum cans and sheets'),
+('INV-002', 'Copper', 'Grade A', '750', 'KG', 'non_ferrous', 'Warehouse A, Section 2', 'available',  'High purity copper wire from electronics'),
+('INV-003', 'Steel', 'Grade B', '1500', 'KG', 'ferrous', 'Warehouse B, Section 1', 'reserved',  'Mixed steel scrap from construction'),
+('INV-004', 'Brass', 'Grade A', '400', 'KG', 'non_ferrous', 'Warehouse C, Section 1', 'available',  'Clean brass fittings and pipes'),
+('INV-005', 'Iron', 'Grade C', '800', 'KG', 'ferrous', 'Warehouse D, Section 2', 'available',  'Iron scraps from automotive parts'),
+('INV-006', 'Aluminum', 'Grade A', '600', 'KG', 'non_ferrous', 'Warehouse E, Section 1', 'sold', 'Processed aluminum sheets and cans'),
+('INV-007', 'Copper', 'Grade B', '950', 'KG', 'non_ferrous', 'Warehouse A, Section 3', 'available',  'Mixed copper cables and wires'),
+('INV-008', 'Steel', 'Grade A', '2200', 'KG', 'ferrous', 'Warehouse B, Section 2', 'reserved',  'High-grade steel from industrial machinery'),
+('INV-009', 'Brass', 'Grade B', '320', 'KG', 'non_ferrous', 'Warehouse C, Section 2', 'available',  'Mixed brass components'),
+('INV-010', 'Iron', 'Grade B', '1100', 'KG', 'ferrous', 'Warehouse D, Section 1', 'available',  'Clean iron sheets and rods');
 
 -- Insert Deals (converted to INR, 1 USD = 83 INR)
 INSERT INTO deals (deal_id, buyer_id, inventory_id, quantity, rate, currency, total_value, status, payment_terms, special_instructions) VALUES
@@ -87,12 +87,12 @@ INSERT INTO documents (deal_id, document_type, file_name, file_path, file_size, 
 (8, 'Invoice', 'INV-DEAL-2025-008.pdf', '/uploads/documents/inv-deal-2025-008.pdf', 298760, 'pending', 2, NULL);
 
 -- Insert Quality Checks
-INSERT INTO quality_checks (deal_id, gross_weight, net_weight, moisture, radiation, purity_percent, test_results, weighbridge_data, inspection_images) VALUES
-(1, '320', '300', '2.5', '0.05', '98.5', '{"density": "2.70", "conductivity": "97%", "impurities": "1.5%"}', '{"weight": "320kg", "date": "2025-06-20", "operator": "QC-001"}', '["aluminum-inspection-1.jpg"]'),
-(3, '520', '500', '1.8', '0.08', '99.3', '{"density": "8.95", "conductivity": "99%", "impurities": "0.7%"}', '{"weight": "520kg", "date": "2025-06-20", "operator": "QC-001"}', '["copper-inspection-3.jpg", "copper-test-3.jpg"]'),
-(4, '1220', '1200', '0.9', '0.04', '96.2', '{"carbon_content": "0.6%", "tensile_strength": "420MPa", "hardness": "HRC 25"}', '{"weight": "1220kg", "date": "2025-06-19", "operator": "QC-002"}', '["steel-inspection-4.jpg"]'),
-(5, '310', '300', '2.1', '0.06', '98.5', '{"zinc_content": "35%", "lead_content": "0.02%", "surface_quality": "excellent"}', '{"weight": "310kg", "date": "2025-06-21", "operator": "QC-001"}', '["brass-inspection-5.jpg", "brass-surface-5.jpg"]'),
-(6, '620', '600', '1.2', '0.03', '94.8', '{"carbon_content": "0.9%", "sulfur_content": "0.01%", "phosphorus": "0.02%"}', '{"weight": "620kg", "date": "2025-06-18", "operator": "QC-003"}', '["iron-inspection-6.jpg"]');
+INSERT INTO quality_checks (deal_id, gross_weight, net_weight, moisture, radiation, purity_percent, test_results) VALUES
+(1, '320', '300', '2.5', '0.05', '98.5', '{"density": "2.70", "conductivity": "97%", "impurities": "1.5%"}'),
+(3, '520', '500', '1.8', '0.08', '99.3', '{"density": "8.95", "conductivity": "99%", "impurities": "0.7%"}'),
+(4, '1220', '1200', '0.9', '0.04', '96.2', '{"carbon_content": "0.6%", "tensile_strength": "420MPa", "hardness": "HRC 25"}'),
+(5, '310', '300', '2.1', '0.06', '98.5', '{"zinc_content": "35%", "lead_content": "0.02%", "surface_quality": "excellent"}'),
+(6, '620', '600', '1.2', '0.03', '94.8', '{"carbon_content": "0.9%", "sulfur_content": "0.01%", "phosphorus": "0.02%"}');
 
 -- Insert System Settings
 INSERT INTO settings (key, value, description, updated_by) VALUES
