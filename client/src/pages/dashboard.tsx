@@ -1,27 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Package, 
-  FileText, 
-  DollarSign, 
-  Ship, 
-  Plus, 
-  TrendingUp,
-  Clock,
+import { useQuery } from "@tanstack/react-query";
+import {
   CheckCircle,
-  UserPlus,
+  DollarSign,
   FileOutput,
-  Recycle,
-  Factory
+  FileText,
+  Package,
+  Plus,
+  Ship,
+  TrendingUp,
+  UserPlus
 } from "lucide-react";
 
-import { useAuth } from "@/hooks/use-auth";
 import AddInventoryModal from "@/components/modals/add-inventory-modal";
 import AddPartnerModal from "@/components/modals/add-partner-modal";
 import CreateDealModal from "@/components/modals/create-deal-modal";
 import ReportGenerationModal from "@/components/modals/report-generation-modal";
+import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
 
 interface DashboardStats {
@@ -176,7 +173,7 @@ export default function Dashboard() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">₹{((stats?.monthlyRevenue || 0) / 100000).toFixed(1)}L</div>
+                  <div className="text-2xl font-bold text-blue-600">₹{((stats?.monthlyRevenue || 0) / 1000000).toFixed(1)}M</div>
                   <div className="text-sm text-gray-600">Monthly Revenue</div>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">

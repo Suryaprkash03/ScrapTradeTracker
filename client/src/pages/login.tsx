@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { authApi, type LoginCredentials } from "@/lib/auth";
-import { useAuth } from "@/hooks/use-auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Factory } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { useLocation } from "wouter";
+import { z } from "zod";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -24,7 +24,8 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function Login() {
   const { login } = useAuth();
   const { toast } = useToast();
-  
+  const [, setLocation] = useLocation();
+
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -42,6 +43,14 @@ export default function Login() {
         title: "Login successful",
         description: `Welcome back, ${data.user.name}!`,
       });
+
+      if (data.user.role === "export_manager") {
+        setLocation("/partners");
+      } else if (data.user.role === "yard_staff") {
+        setLocation("/inventory");
+      } else {
+        setLocation("/dashboard");
+      }
     },
     onError: (error: any) => {
       toast({
@@ -51,6 +60,7 @@ export default function Login() {
       });
     },
   });
+
 
   const onSubmit = (data: LoginForm) => {
     loginMutation.mutate({
@@ -71,7 +81,7 @@ export default function Login() {
             <p className="text-gray-600 mt-2">Metal Export & Import Management</p>
           </div>
         </CardHeader>
-        
+
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
@@ -87,7 +97,7 @@ export default function Login() {
                 <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -101,7 +111,7 @@ export default function Login() {
                 <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
               )}
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -114,7 +124,7 @@ export default function Login() {
                 Forgot password?
               </Button>
             </div>
-            
+
             <Button
               type="submit"
               className="w-full h-12"
@@ -123,7 +133,7 @@ export default function Login() {
               {loginMutation.isPending ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          
+
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 mb-2">Demo Users:</p>
             <div className="space-y-1 text-xs text-gray-500">

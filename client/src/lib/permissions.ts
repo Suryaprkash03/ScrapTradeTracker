@@ -33,7 +33,6 @@ export const PERMISSIONS = {
   // Export Manager permissions
   EXPORT_MANAGER: {
     pages: [
-      '/dashboard',
       '/deals',
       '/documents',
       '/shipments',
