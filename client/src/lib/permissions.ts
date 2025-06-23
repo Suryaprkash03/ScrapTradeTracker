@@ -11,8 +11,9 @@ export const PERMISSIONS = {
       '/finance',
       '/reports',
       '/imports',
-      '/settings',
-      '/partners'
+      '/partners',
+      '/scrap-lifecycle',
+      '/quality-check',
     ],
     actions: [
       'create_user',
@@ -22,7 +23,7 @@ export const PERMISSIONS = {
       'manage_deals',
       'manage_inventory',
       'manage_shipments',
-      'manage_documents',
+      'upload_documents',
       'approve_deals',
       'reject_deals',
       'access_all_reports',

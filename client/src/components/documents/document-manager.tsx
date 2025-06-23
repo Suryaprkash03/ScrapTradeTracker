@@ -5,13 +5,13 @@ import type React from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -25,22 +25,22 @@ import { apiRequest } from "@/lib/queryClient"
 import type { Deal, Document } from "@shared/schema"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Download,
-  Eye,
-  FileCheck,
-  FileText,
-  FileX,
-  Filter,
-  Paperclip,
-  Plus,
-  Search,
-  Shield,
-  TrendingUp,
-  Upload,
-  XCircle,
+    AlertCircle,
+    CheckCircle,
+    Clock,
+    Download,
+    Eye,
+    FileCheck,
+    FileText,
+    FileX,
+    Filter,
+    Paperclip,
+    Plus,
+    Search,
+    Shield,
+    TrendingUp,
+    Upload,
+    XCircle,
 } from "lucide-react"
 import { useState } from "react"
 
@@ -411,7 +411,7 @@ export default function DocumentManager() {
                         <SelectContent>
                           {deals.map((deal: Deal) => (
                             <SelectItem key={deal.id} value={deal.id.toString()}>
-                              {deal.dealId} - ₹{deal.totalValue}
+                              {deal.dealId} - ${deal.totalValue}
                             </SelectItem>
                           ))}
                         </SelectContent>

@@ -210,7 +210,7 @@ export default function ReportsPage() {
                     <Skeleton className="h-8 w-20 mt-2" />
                   ) : (
                     <p className="text-2xl font-bold text-gray-900 mt-2">
-                      ₹
+                      $
                       {deals?.length
                         ? Math.round(
                             (deals.reduce((sum, d) => sum + Number.parseFloat(d.totalValue), 0) * 83) /
@@ -329,7 +329,7 @@ export default function ReportsPage() {
                     >
                       <span className="text-sm font-medium text-gray-700">{deal.id}</span>
                       <span className="text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                        ₹{((deal.profit * 83) / 100000).toFixed(1)}L
+                        ${((deal.profit * 83) / 100000).toFixed(1)}L
                       </span>
                     </div>
                   ))}
@@ -338,7 +338,7 @@ export default function ReportsPage() {
                   <div className="flex justify-between items-center p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl">
                     <span className="text-sm font-medium text-gray-700">Avg Profit/Deal</span>
                     <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                      ₹
+                      $
                       {profitPerDeal.length > 0
                         ? (
                             ((profitPerDeal.reduce((sum, d) => sum + d.profit, 0) / profitPerDeal.length) * 83) /

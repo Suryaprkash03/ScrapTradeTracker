@@ -127,12 +127,12 @@ export class ReportGenerator {
     
     yPos += 15;
     const summaryData = [
-      ['Total Revenue', `₹${data.data.totalRevenue.toLocaleString()}`],
-      ['Completed Revenue', `₹${data.data.completedRevenue.toLocaleString()}`],
-      ['Pending Revenue', `₹${data.data.pendingRevenue.toLocaleString()}`],
+      ['Total Revenue', `${data.data.totalRevenue.toLocaleString()}`],
+      ['Completed Revenue', `${data.data.completedRevenue.toLocaleString()}`],
+      ['Pending Revenue', `${data.data.pendingRevenue.toLocaleString()}`],
       ['Total Deals', data.data.totalDeals.toString()],
       ['Completed Deals', data.data.completedDeals.toString()],
-      ['Average Deal Value', `₹${data.data.avgDealValue.toLocaleString()}`]
+      ['Average Deal Value', `${data.data.avgDealValue.toLocaleString()}`]
     ];
     
     autoTable(this.doc, {
@@ -150,9 +150,9 @@ export class ReportGenerator {
     
     const dealsData = data.data.deals.map((deal: any) => [
       deal.dealId,
-      `₹${parseFloat(deal.totalValue).toLocaleString()}`,
+      `$${parseFloat(deal.totalValue).toLocaleString()}`,
       deal.status,
-      deal.currency,
+      "USD",
       new Date(deal.createdAt).toLocaleDateString()
     ]);
     

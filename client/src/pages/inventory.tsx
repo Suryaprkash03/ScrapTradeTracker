@@ -380,7 +380,10 @@ export default function InventoryPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEdit(item)}
+                              onClick={() => {
+                                setSelectedItem(item)
+                                setShowViewModal(true)
+                              }}
                               className="h-8 w-8 p-0 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 hover:border-indigo-200 transition-all duration-300"
                             >
                               <Edit className="w-4 h-4 text-indigo-600" />

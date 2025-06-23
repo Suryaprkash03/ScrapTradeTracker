@@ -1,15 +1,14 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Edit, Save, X, DollarSign, Calendar, CreditCard, FileText } from "lucide-react";
 import type { Payment } from "@shared/schema";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Calendar, CreditCard, DollarSign, Edit, FileText, Save, X } from "lucide-react";
+import { useState } from "react";
 
 interface ViewPaymentModalProps {
   open: boolean;
@@ -84,7 +83,7 @@ export default function ViewPaymentModal({ open, onOpenChange, payment }: ViewPa
             <span>Payment Details - #{payment.id}</span>
             <div className="flex gap-2">
               {!isEditing ? (
-                <Button onClick={handleEdit} size="sm">
+                <Button onClick={handleEdit} size="sm" className="bg-indigo-600 hover:bg-indigo-700">
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
                 </Button>

@@ -294,14 +294,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/shipments", async (req, res) => {
-    try {
-      const shipmentData = insertShipmentSchema.parse(req.body);
-      const shipment = await storage.createShipment(shipmentData);
-      res.status(201).json(shipment);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid shipment data" });
-    }
-  });
+  try {
+    const body = {
+      ...req.body,
+      eta: req.body.eta ? new Date(req.body.eta) : undefined,
+    };
+
+    const shipmentData = insertShipmentSchema.parse(body);
+    const shipment = await storage.createShipment(shipmentData);
+
+    res.status(201).json(shipment);
+  } catch (error) {
+    console.error("Validation error:", error);
+    res.status(400).json({ message: "Invalid shipment data" });
+  }
+});
 
   // Payment routes
   app.get("/api/payments", async (req, res) => {
@@ -449,26 +456,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
 
         case 'financial':
-          const totalRevenue = deals.reduce((sum, deal) => sum + parseFloat(deal.totalValue), 0);
-          const completedRevenue = deals
-            .filter(deal => deal.status === 'completed')
-            .reduce((sum, deal) => sum + parseFloat(deal.totalValue), 0);
-          
-          reportData = {
-            title: 'Financial Report',
-            generatedAt: new Date().toISOString(),
-            data: {
-              totalRevenue,
-              completedRevenue,
-              pendingRevenue: totalRevenue - completedRevenue,
-              totalDeals: deals.length,
-              completedDeals: deals.filter(deal => deal.status === 'completed').length,
-              avgDealValue: totalRevenue / deals.length || 0,
-              deals,
-              payments
-            }
-          };
-          break;
+        // Helper to format as USD currency
+        const formatCurrency = (num) => {
+          return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            maximumFractionDigits: 2,
+          }).format(num);
+        };
+
+        // Calculate raw numeric values first
+        const totalRevenue = deals.reduce((sum, deal) => sum + parseFloat(deal.totalValue), 0);
+        const completedRevenue = deals
+          .filter(deal => deal.status === 'completed')
+          .reduce((sum, deal) => sum + parseFloat(deal.totalValue), 0);
+
+        // Build report object with formatted currency
+        reportData = {
+          title: 'Financial Report',
+          generatedAt: new Date().toISOString(),
+          data: {
+            totalRevenue: formatCurrency(totalRevenue),
+            completedRevenue: formatCurrency(completedRevenue),
+            pendingRevenue: formatCurrency(totalRevenue - completedRevenue),
+            totalDeals: deals.length,
+            completedDeals: deals.filter(deal => deal.status === 'completed').length,
+            avgDealValue: formatCurrency(totalRevenue / deals.length || 0),
+            deals,
+            payments
+          }
+        };
+        break;
+
 
         case 'partners':
           reportData = {

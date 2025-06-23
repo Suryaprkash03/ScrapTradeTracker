@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { apiRequest } from "@/lib/queryClient"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { insertShipmentSchema, type Deal, type Shipment } from "@shared/schema"
+import type { Deal, Shipment } from "@shared/schema"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   Anchor,
@@ -33,8 +33,18 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-const createShipmentSchema = insertShipmentSchema.extend({
+const createShipmentSchema = z.object({
   dealId: z.number().min(1, "Deal is required"),
+  containerNo: z.string().optional(),
+  vesselName: z.string().optional(),
+  eta: z
+    .string()
+    .optional()
+    .refine((val) => !val || !isNaN(Date.parse(val)), {
+      message: "Invalid ETA format",
+    }),
+  status: z.string().default("preparation"),
+  trackingNotes: z.string().optional(),
 })
 
 type CreateShipmentForm = z.infer<typeof createShipmentSchema>
@@ -66,7 +76,7 @@ export default function ShipmentsPage() {
       dealId: 0,
       containerNo: "",
       vesselName: "",
-      eta: undefined,
+      eta: "",
       status: "preparation",
       trackingNotes: "",
     },
@@ -201,7 +211,18 @@ export default function ShipmentsPage() {
   }
 
   const onSubmit = (data: CreateShipmentForm) => {
-    createMutation.mutate(data)
+    // Prepare data for API submission with proper date formatting
+    const submitData = {
+      dealId: data.dealId,
+      containerNo: data.containerNo || "",
+      vesselName: data.vesselName || "",
+      eta: data.eta ? new Date(data.eta).toISOString() : "",
+      status: data.status,
+      trackingNotes: data.trackingNotes || "",
+    }
+
+    console.log("Submitting shipment data:", submitData)
+    createMutation.mutate(submitData)
   }
 
   const filteredShipments = shipments?.filter((shipment) => {
@@ -421,7 +442,10 @@ export default function ShipmentsPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => handleEdit(shipment)}
+                              onClick={() => {
+                                setSelectedShipment(shipment)
+                                setShowViewModal(true)
+                              }}
                               className="h-8 w-8 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 hover:border-indigo-200 transition-all duration-300"
                             >
                               <Edit className="w-4 h-4 text-indigo-600" />
@@ -541,7 +565,7 @@ export default function ShipmentsPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="eta" className="text-sm font-semibold text-gray-700">
-                        ETA
+                        ETA (Optional)
                       </Label>
                       <Input
                         id="eta"
@@ -549,7 +573,62 @@ export default function ShipmentsPage() {
                         className="bg-white/60 backdrop-blur-sm border-white/20"
                         {...form.register("eta")}
                       />
+                      {form.formState.errors.eta && (
+                        <p className="text-sm text-red-600 font-medium">{form.formState.errors.eta.message}</p>
+                      )}
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="status" className="text-sm font-semibold text-gray-700">
+                      Initial Status
+                    </Label>
+                    <Select onValueChange={(value) => form.setValue("status", value)} defaultValue="preparation">
+                      <SelectTrigger className="bg-white/60 backdrop-blur-sm border-white/20">
+                        <SelectValue placeholder="Select initial status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="preparation">
+                          <div className="flex items-center space-x-2">
+                            <Timer className="w-4 h-4 text-slate-500" />
+                            <span>Preparation</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="pickup">
+                          <div className="flex items-center space-x-2">
+                            <Truck className="w-4 h-4 text-blue-500" />
+                            <span>Pickup</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="gate_in">
+                          <div className="flex items-center space-x-2">
+                            <MapPin className="w-4 h-4 text-indigo-500" />
+                            <span>Gate In</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="sealed">
+                          <div className="flex items-center space-x-2">
+                            <Container className="w-4 h-4 text-purple-500" />
+                            <span>Sealed</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="dispatched">
+                          <div className="flex items-center space-x-2">
+                            <Ship className="w-4 h-4 text-orange-500" />
+                            <span>Dispatched</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="delivered">
+                          <div className="flex items-center space-x-2">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                            <span>Delivered</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {form.formState.errors.status && (
+                      <p className="text-sm text-red-600 font-medium">{form.formState.errors.status.message}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -579,6 +658,13 @@ export default function ShipmentsPage() {
                   type="submit"
                   disabled={createMutation.isPending}
                   className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg"
+                  onClick={() => {
+                    // Debug form validation
+                    const errors = form.formState.errors
+                    if (Object.keys(errors).length > 0) {
+                      console.log("Form validation errors:", errors)
+                    }
+                  }}
                 >
                   {createMutation.isPending ? "Creating..." : "Create Shipment"}
                 </Button>
