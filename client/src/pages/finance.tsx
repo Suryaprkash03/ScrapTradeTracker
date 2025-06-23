@@ -413,6 +413,10 @@ export default function FinancePage() {
                         <td className="px-6 py-4 text-sm">
                           <div className="flex space-x-2">
                             <Button
+                              onClick={() => {
+                                setSelectedPayment(payment)
+                                setShowViewModal(true)
+                              }}
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 hover:border-indigo-200 transition-all duration-300"
